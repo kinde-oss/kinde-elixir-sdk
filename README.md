@@ -69,6 +69,15 @@ Initialize your client like this:
   )
 ```
 
+### OAuth Flows (Grant Types)
+KindeClientSDK implements three OAuth flows: Client Credentials flow, Authorisation Code flow and Authorisation Code with PKCE flow. Each flow can be used with their corresponding grant type when initializing a client.
+
+| OAuth Flow | Grant Type | Type |
+| ---------- | ---------- | ---- |
+| Client Credentials | :client_credentials | atom |
+| Authorisation Code | :authorization_code | atom |
+| Authorisation Code with PKCE | :authorization_code_flow_pkce | atom |
+
 ### ETS Cache
 
 KindeClientSDK implements persistant ETS cache for storing the client data and authenticating variables.
