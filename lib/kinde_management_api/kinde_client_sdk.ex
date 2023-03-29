@@ -465,6 +465,7 @@ defmodule KindeClientSDK do
 
     case GenServer.call(pid, {:get_kinde_data, :kinde_user}) do
       nil -> nil
+      [] -> nil
       [kinde_user: user] -> user
     end
   end
@@ -532,7 +533,8 @@ defmodule KindeClientSDK do
 
     expires_in = GenServer.call(pid, {:get_kinde_data, :kinde_expires_in})
 
-    if [kinde_login_time_stamp: nil] == timestamp or [kinde_expires_in: nil] == expires_in do
+    if [kinde_login_time_stamp: nil] == timestamp or [kinde_expires_in: nil] == expires_in or
+         timestamp == [] or expires_in == [] do
       false
     else
       [kinde_login_time_stamp: timestamp] = timestamp
