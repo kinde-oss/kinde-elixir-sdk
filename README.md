@@ -232,7 +232,7 @@ You can override this by passing scope into the KindeSDK.
 | create_org    | Constructs redirect url and sends user to Kinde to sign up and create a new org for your business | conn, client  | ```KindeClientSDK.create_org(conn, client)``` |
 | get_claims     | Gets all claims from an access or id token   | conn, atom | ```KindeClientSDK.get_claims(conn)``` or ```KindeClientSDK.get_claims(conn, :id_token)```  |
 | get_claim     | Gets a claim from an access or id token   | conn, string, atom | ```KindeClientSDK.get_claim(conn, "jti")``` or ```KindeClientSDK.get_claim(conn, "jti", :id_token)```  |
-| get_permissions   | Returns the state of a all permissions   | conn  | ```KindeClientSDK.get_permissions(conn)```   |
+| get_permissions   | Returns the state of a all permissions   | conn, atom  | ```KindeClientSDK.get_permissions(conn, :id_token)```   |
 | get_permission   | Returns the state of a given permission   | conn, string  | ```KindeClientSDK.get_permission(conn, "create:users")```   |
 | get_organization | Get details for the organization your user is logged into     | conn | ```KindeClientSDK.get_user_organization(conn)```     |
 | get_user_detail  | Returns the profile for the current user  | conn | ```KindeClientSDK.get_user_detail(conn)``` |

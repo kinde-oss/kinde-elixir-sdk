@@ -605,10 +605,11 @@ defmodule KindeClientSDK do
   ### Usage
 
         KindeClientSDK.get_permissions(conn)
+        KindeClientSDK.get_permissions(conn, :id_token)
   """
-  @spec get_permissions(Plug.Conn.t()) :: %{org_code: any, permissions: any}
-  def get_permissions(conn) do
-    claims = get_claims(conn)
+  @spec get_permissions(Plug.Conn.t(), any) :: %{org_code: any, permissions: any}
+  def get_permissions(conn, token_type \\ :access_token) do
+    claims = get_claims(conn, token_type)
     %{org_code: claims["org_code"], permissions: claims["permissions"]}
   end
 
@@ -618,10 +619,11 @@ defmodule KindeClientSDK do
   ### Usage
 
         KindeClientSDK.get_permission(conn, "create:users")
+        KindeClientSDK.get_permission(conn, "create:users", :id_token)
   """
-  @spec get_permission(Plug.Conn.t(), any) :: %{is_granted: boolean, org_code: any}
-  def get_permission(conn, permission) do
-    all_claims = get_claims(conn)
+  @spec get_permission(Plug.Conn.t(), any, any) :: %{is_granted: boolean, org_code: any}
+  def get_permission(conn, permission, token_type \\ :access_token) do
+    all_claims = get_claims(conn, token_type)
     permissions = all_claims["permissions"]
     %{org_code: all_claims["org_code"], is_granted: permission in permissions}
   end
@@ -634,7 +636,7 @@ defmodule KindeClientSDK do
   """
   @spec get_organization(Plug.Conn.t()) :: %{org_code: any}
   def get_organization(conn) do
-    %{org_code: get_claim(conn, "org_code")}
+    %{org_code: get_claim(conn, "org_code", :id_token)}
   end
 
   @doc """
