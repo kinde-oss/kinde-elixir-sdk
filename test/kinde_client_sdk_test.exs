@@ -134,6 +134,19 @@ defmodule KindeClientSDKTest do
     assert is_nil(KindeClientSDK.get_user_detail(conn))
   end
 
+  test "get user for authenticated client", %{conn: conn} do
+    {conn, client} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+
+    conn = ClientTestHelper.mock_token(conn, client.cache_pid)
+
+    assert KindeClientSDK.get_user_detail(conn) == %{
+             email: "user@kinde.com",
+             family_name: "Doe",
+             given_name: "John",
+             id: "test@kinde.com"
+           }
+  end
+
   test "get user for authenticated client_credentials grant", %{conn: conn} do
     {conn, client} = ClientTestHelper.initialize_valid_client(conn, @grant_type)
 
@@ -153,6 +166,15 @@ defmodule KindeClientSDKTest do
   end
 
   test "permissions for authenticated client", %{conn: conn} do
+    {conn, client} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+
+    conn = ClientTestHelper.mock_token(conn, client.cache_pid)
+
+    assert KindeClientSDK.get_permissions(conn, :id_token) ==
+             %{org_code: "765546", permissions: nil}
+  end
+
+  test "permissions for authenticated client_credential client", %{conn: conn} do
     {conn, client} = ClientTestHelper.initialize_valid_client(conn, @grant_type)
 
     pid = Conn.get_session(conn, :kinde_cache_pid)
