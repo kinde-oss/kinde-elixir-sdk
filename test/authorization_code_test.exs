@@ -16,12 +16,11 @@ defmodule AuthorizationCodeTest do
 
   test "initialize the client", %{conn: conn, client: client} do
     assert client.token_endpoint == @domain <> "/oauth2/token"
-    refute is_nil(Conn.get_session(conn, :kinde_cache_pid))
+    refute is_nil(KindeClientSDK.get_cache_pid(conn))
   end
 
   test "do login", %{conn: conn, client: client} do
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     conn = KindeClientSDK.login(conn, client)
 
@@ -36,8 +35,7 @@ defmodule AuthorizationCodeTest do
     {conn, client} =
       ClientTestHelper.initialize_valid_client_add_params(conn, @grant_type, additional_params)
 
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     conn = KindeClientSDK.login(conn, client)
 
@@ -52,8 +50,7 @@ defmodule AuthorizationCodeTest do
     {conn, client} =
       ClientTestHelper.initialize_valid_client_add_params(conn, @grant_type, additional_params)
 
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     additional_params_more = %{
       org_code: "org_123",

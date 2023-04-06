@@ -150,8 +150,7 @@ defmodule KindeClientSDKTest do
   test "get user for authenticated client_credentials grant", %{conn: conn} do
     {conn, client} = ClientTestHelper.initialize_valid_client(conn, @grant_type)
 
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     conn = KindeClientSDK.login(conn, client)
 
@@ -177,11 +176,40 @@ defmodule KindeClientSDKTest do
   test "permissions for authenticated client_credential client", %{conn: conn} do
     {conn, client} = ClientTestHelper.initialize_valid_client(conn, @grant_type)
 
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     conn = KindeClientSDK.login(conn, client)
 
     assert KindeClientSDK.get_permissions(conn) == %{org_code: nil, permissions: nil}
+  end
+
+  test "save client", %{conn: conn} do
+    {conn, client} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+    client = KindeClientSDK.save_kinde_client(conn, client)
+
+    assert client == :ok
+  end
+
+  test "get client", %{conn: conn} do
+    {conn, client} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+    KindeClientSDK.save_kinde_client(conn, client)
+
+    get_client = KindeClientSDK.get_kinde_client(conn)
+
+    assert client.domain == get_client.domain
+  end
+
+  test "get cache pid", %{conn: conn} do
+    assert is_nil(KindeClientSDK.get_cache_pid(conn))
+
+    {conn, _} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+    assert !is_nil(KindeClientSDK.get_cache_pid(conn))
+  end
+
+  test "get all data", %{conn: conn} do
+    {conn, _} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+    data = KindeClientSDK.get_all_data(conn)
+
+    assert is_nil(data.token)
   end
 end

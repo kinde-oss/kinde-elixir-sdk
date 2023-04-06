@@ -3,7 +3,6 @@ defmodule ClientCredentialsTest do
 
   alias ClientTestHelper
   alias KindeClientSDK
-  alias Plug.Conn
 
   @domain Application.get_env(:kinde_management_api, :domain)
   @grant_type :client_credentials
@@ -16,18 +15,17 @@ defmodule ClientCredentialsTest do
 
   test "initialize the client", %{conn: conn, client: client} do
     assert client.token_endpoint == @domain <> "/oauth2/token"
-    refute is_nil(Conn.get_session(conn, :kinde_cache_pid))
+    refute is_nil(KindeClientSDK.get_cache_pid(conn))
   end
 
   test "get access token", %{conn: conn, client: client} do
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     KindeClientSDK.login(conn, client)
 
-    [kinde_token: token] = GenServer.call(pid, {:get_kinde_data, :kinde_token})
+    data = KindeClientSDK.get_all_data(conn)
 
-    refute is_nil(token["access_token"])
+    refute is_nil(data.access_token)
   end
 
   test "login with audience", %{conn: conn, client: client} do
@@ -35,8 +33,7 @@ defmodule ClientCredentialsTest do
       audience: @domain <> "/api"
     }
 
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     assert KindeClientSDK.login(conn, client, additional_params)
   end
@@ -47,13 +44,12 @@ defmodule ClientCredentialsTest do
       org_name: "My Application"
     }
 
-    pid = Conn.get_session(conn, :kinde_cache_pid)
-    GenServer.cast(pid, {:add_kinde_data, {:kinde_client, client}})
+    KindeClientSDK.save_kinde_client(conn, client)
 
     KindeClientSDK.login(conn, client, additional_params)
 
-    [kinde_token: token] = GenServer.call(pid, {:get_kinde_data, :kinde_token})
+    data = KindeClientSDK.get_all_data(conn)
 
-    refute is_nil(token["access_token"])
+    refute is_nil(data.access_token)
   end
 end
