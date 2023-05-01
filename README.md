@@ -192,16 +192,16 @@ For details on how to connect, see [Register an API](https://kinde.com/docs/deve
 
 ## Overriding scope
 
-By default the KindeSDK SDK requests the following scopes:
+By default the kindeManagementAPI requests the following scopes:
 
 - profile
 - email
 - offline
 - openid
 
-You can override this by passing scope into the KindeSDK.
+You can override this by passing scope into the kindeManagementAPI.
 
-## SDK API Reference
+## kinde Management API Reference
 
 | Property | Type | Is required | Default | Description |
 | -------- | ---- | ----------- | ------- | ----------- |
@@ -218,7 +218,7 @@ You can override this by passing scope into the KindeSDK.
 | additional_parameters - org_code | string | No  |  | The org claim for the JWT |
 
 
-## SDK Functions
+## kinde Management API Functions
 
 | Function | Description | Arguments | Usage |
 | -------- | ---- | ----------- | ------- |
