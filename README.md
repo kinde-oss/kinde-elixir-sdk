@@ -201,7 +201,7 @@ By default the KindeSDK requests the following scopes:
 
 You can override this by passing scope into the KindeSDK.
 
-## kinde Management API Reference
+## kinde SDK Reference
 
 | Property | Type | Is required | Default | Description |
 | -------- | ---- | ----------- | ------- | ----------- |
@@ -218,7 +218,7 @@ You can override this by passing scope into the KindeSDK.
 | additional_parameters - org_code | string | No  |  | The org claim for the JWT |
 
 
-## kinde Management API Functions
+## SDK Functions
 
 | Function | Description | Arguments | Usage |
 | -------- | ---- | ----------- | ------- |
