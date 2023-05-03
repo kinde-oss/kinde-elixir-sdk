@@ -1,9 +1,9 @@
-defmodule KindeManagementAPI.Mixfile do
+defmodule KindeSDK.Mixfile do
   use Mix.Project
 
   def project do
     [
-      app: :kinde_management_api,
+      app: :kinde_sdk,
       version: "0.1.0",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
@@ -45,7 +45,7 @@ defmodule KindeManagementAPI.Mixfile do
 
   defp package do
     [
-      name: "kinde_management_api",
+      name: "kinde_sdk",
       files: ~w(.formatter.exs config lib mix.exs README* LICENSE*)
     ]
   end
