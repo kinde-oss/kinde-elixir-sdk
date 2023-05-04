@@ -1,7 +1,7 @@
 defmodule UtilsTest do
   use ExUnit.Case
 
-  alias KindeManagementAPI.SDK.Utils
+  alias KindeSDK.SDK.Utils
 
   test "random string" do
     str = Utils.random_string(28)

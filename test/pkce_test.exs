@@ -5,7 +5,7 @@ defmodule PkceTest do
   alias KindeClientSDK
   alias Plug.Conn
 
-  @domain Application.get_env(:kinde_management_api, :domain)
+  @domain Application.get_env(:kinde_sdk, :domain)
   @grant_type :authorization_code_flow_pkce
 
   setup_all do

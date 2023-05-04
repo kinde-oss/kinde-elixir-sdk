@@ -13,13 +13,13 @@ You need a Kinde domain to get started, e.g. `yourapp.kinde.com`.
 Add the following dependency in your project:
 
 ```elixir
-{:kinde_management_api, path: "/path/to/kinde-elixir-sdk"}
+{:kinde_sdk, path: "/path/to/kinde-elixir-sdk"}
 ```
 and add to your extra applications:
 ```elixir
  def application do
     [
-      extra_applications: [:logger, :kinde_management_api]
+      extra_applications: [:logger, :kinde_sdk]
     ]
   end
 ```
@@ -31,7 +31,7 @@ and add to your extra applications:
 You can set your keys in your application configuration. Use `config/config.exs`. For example:
 
 ```elixir
-config :kinde_management_api,
+config :kinde_sdk,
   backend_client_id: "test_x1y2z3a1",
   frontend_client_id: "test_a1b2c3d4",
   client_secret: "test_112233",
@@ -42,13 +42,13 @@ config :kinde_management_api,
 
 Optionally, you can also set `scope` as well.
 ```elixir
-config :kinde_management_api,
+config :kinde_sdk,
   scope: "email"
 ```
 
 You can also use `System.get_env/1` to retrieve the API key from an environment variables. For example:
 ```elixir
-config :kinde_management_api,
+config :kinde_sdk,
   backend_client_id: System.get_env("KINDE_BACKEND_CLIENT_ID")
 ```
 
@@ -60,12 +60,12 @@ Initialize your client like this:
 {conn, client} =
   KindeClientSDK.init(
     conn,
-    Application.get_env(:kinde_management_api, :domain),
-    Application.get_env(:kinde_management_api, :redirect_url),
-    Application.get_env(:kinde_management_api, :backend_client_id),
-    Application.get_env(:kinde_management_api, :client_secret),
+    Application.get_env(:kinde_sdk, :domain),
+    Application.get_env(:kinde_sdk, :redirect_url),
+    Application.get_env(:kinde_sdk, :backend_client_id),
+    Application.get_env(:kinde_sdk, :client_secret),
     :client_credentials,
-    Application.get_env(:kinde_management_api, :logout_redirect_url)
+    Application.get_env(:kinde_sdk, :logout_redirect_url)
   )
 ```
 
@@ -177,12 +177,12 @@ additional_params = %{
 
 KindeClientSDK.init(
   conn,
-  Application.get_env(:kinde_management_api, :domain),
-  Application.get_env(:kinde_management_api, :redirect_url),
-  Application.get_env(:kinde_management_api, :backend_client_id),
-  Application.get_env(:kinde_management_api, :client_secret),
+  Application.get_env(:kinde_sdk, :domain),
+  Application.get_env(:kinde_sdk, :redirect_url),
+  Application.get_env(:kinde_sdk, :backend_client_id),
+  Application.get_env(:kinde_sdk, :client_secret),
   :authorization_code_flow_pkce,
-  Application.get_env(:kinde_management_api, :logout_redirect_url),
+  Application.get_env(:kinde_sdk, :logout_redirect_url),
   "openid profile email offline",
   additional_params
   )
@@ -192,16 +192,16 @@ For details on how to connect, see [Register an API](https://kinde.com/docs/deve
 
 ## Overriding scope
 
-By default the kindeManagementAPI requests the following scopes:
+By default the KindeSDK requests the following scopes:
 
 - profile
 - email
 - offline
 - openid
 
-You can override this by passing scope into the kindeManagementAPI.
+You can override this by passing scope into the KindeSDK.
 
-## kinde Management API Reference
+## kinde SDK Reference
 
 | Property | Type | Is required | Default | Description |
 | -------- | ---- | ----------- | ------- | ----------- |
@@ -218,7 +218,7 @@ You can override this by passing scope into the kindeManagementAPI.
 | additional_parameters - org_code | string | No  |  | The org claim for the JWT |
 
 
-## kinde Management API Functions
+## SDK Functions
 
 | Function | Description | Arguments | Usage |
 | -------- | ---- | ----------- | ------- |
