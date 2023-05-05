@@ -561,7 +561,7 @@ defmodule KindeClientSDK do
   end
 
   @doc """
-  Returns a single claim from token and its value.
+  Returns a single claim object from token and its name and value.
 
   ### Usage
 
@@ -576,7 +576,10 @@ defmodule KindeClientSDK do
   @spec get_claim(Plug.Conn.t(), any, any) :: any
   def get_claim(conn, key, token_type \\ :access_token) do
     data = get_claims(conn, token_type)
-    data[key]
+    %{
+      name: key,
+      value: data[key]
+    }
   end
 
   @doc """
