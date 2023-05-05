@@ -4,7 +4,7 @@ defmodule KindeSDK.Mixfile do
   def project do
     [
       app: :kinde_sdk,
-      version: "0.1.0",
+      version: "1.0.0",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -46,7 +46,9 @@ defmodule KindeSDK.Mixfile do
   defp package do
     [
       name: "kinde_sdk",
-      files: ~w(.formatter.exs config lib mix.exs README* LICENSE*)
+      files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
+      licenses: ["MIT"],
+      links: %{"GitHub" => "https://github.com/kinde-oss/kinde-elixir-sdk"}
     ]
   end
 end
