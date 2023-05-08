@@ -430,7 +430,8 @@ defmodule KindeClientSDK do
         id: payload["sub"],
         given_name: payload["given_name"],
         family_name: payload["family_name"],
-        email: payload["email"]
+        email: payload["email"],
+        picture: payload["picture"]
       }
 
       GenServer.cast(pid, {:add_kinde_data, {:kinde_user, user}})
