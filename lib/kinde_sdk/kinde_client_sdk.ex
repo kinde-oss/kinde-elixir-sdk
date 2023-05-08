@@ -399,7 +399,11 @@ defmodule KindeClientSDK do
     form_params = Map.to_list(form_params)
     body = {:form, form_params}
 
-    {:ok, response} = HTTPoison.post(client.token_endpoint, body, [{"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}])
+    {:ok, response} =
+      HTTPoison.post(client.token_endpoint, body, [
+        {"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}
+      ])
+
     body = Jason.decode!(response.body)
 
     GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
@@ -434,7 +438,10 @@ defmodule KindeClientSDK do
         picture: payload["picture"]
       }
 
-      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, user}})
+      GenServer.cast(
+        pid,
+        {:add_kinde_data, {:kinde_user, user}}
+      )
     else
       GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
     end
@@ -577,6 +584,7 @@ defmodule KindeClientSDK do
   @spec get_claim(Plug.Conn.t(), any, any) :: any
   def get_claim(conn, key, token_type \\ :access_token) do
     data = get_claims(conn, token_type)
+
     %{
       name: key,
       value: data[key]
