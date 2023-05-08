@@ -77,4 +77,10 @@ defmodule KindeSDK.SDK.Utils do
     |> check_additional_params()
     |> Map.merge(target)
   end
+
+  def get_current_app_version() do
+    Mix.Project.config()[:version]
+    |> String.replace("~>", "")
+    |> String.trim_leading()
+  end
 end

@@ -397,9 +397,9 @@ defmodule KindeClientSDK do
       end
 
     form_params = Map.to_list(form_params)
-
     body = {:form, form_params}
-    {:ok, response} = HTTPoison.post(client.token_endpoint, body)
+
+    {:ok, response} = HTTPoison.post(client.token_endpoint, body, [{"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}])
     body = Jason.decode!(response.body)
 
     GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
