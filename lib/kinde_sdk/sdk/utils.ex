@@ -78,6 +78,7 @@ defmodule KindeSDK.SDK.Utils do
     |> Map.merge(target)
   end
 
+  @spec get_current_app_version :: binary
   def get_current_app_version() do
     Mix.Project.config()[:version]
     |> String.replace("~>", "")
