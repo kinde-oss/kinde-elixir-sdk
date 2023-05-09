@@ -36,8 +36,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
       "value" => "grayscale"
     }
   """
-  @spec get_flag(nil | maybe_improper_list | map, any) ::
-          <<_::440>> | %{optional(<<_::32, _::_*8>>) => any}
+  @spec get_flag(map(), String.t()) :: map() | String.t()
   def get_flag(feature_flags, code) do
     cond do
       not is_nil(feature_flags[code]) ->
@@ -53,8 +52,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     end
   end
 
-  @spec get_flag(nil | maybe_improper_list | map, any, any) ::
-          <<_::440>> | %{optional(<<_::32, _::_*8>>) => any}
+  @spec get_flag(map(), String.t(), any()) :: map() | String.t()
   def get_flag(feature_flags, code, default_value) do
     cond do
       is_nil(feature_flags[code]) and default_value ->
@@ -69,8 +67,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     end
   end
 
-  @spec get_flag(nil | maybe_improper_list | map, any, any, any) ::
-          <<_::64, _::_*8>> | %{optional(<<_::32, _::_*8>>) => any}
+  @spec get_flag(map(), String.t(), any(), String.t()) :: map() | String.t()
   def get_flag(feature_flags, code, default_value, flag_type) do
     cond do
       feature_flags[code]["t"] != flag_type ->
@@ -89,7 +86,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     true, false or error-messages
   """
 
-  @spec get_boolean_flag(nil | maybe_improper_list | map, any) :: any
+  @spec get_boolean_flag(map(), String.t()) :: boolean() | String.t()
   def get_boolean_flag(feature_flags, code) do
     cond do
       not is_nil(feature_flags[code]) ->
@@ -104,7 +101,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     end
   end
 
-  @spec get_boolean_flag(nil | maybe_improper_list | map, any, any) :: any
+  @spec get_boolean_flag(map(), String.t(), boolean()) :: boolean() | String.t()
   def get_boolean_flag(feature_flags, code, default_value) do
     cond do
       not is_nil(feature_flags[code]) ->
@@ -122,7 +119,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
 
     corresponding values from object or error-messages
   """
-  @spec get_string_flag(nil | maybe_improper_list | map, any) :: any
+  @spec get_string_flag(map(), String.t()) :: String.t()
   def get_string_flag(feature_flags, code) do
     cond do
       not is_nil(feature_flags[code]) ->
@@ -137,7 +134,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     end
   end
 
-  @spec get_string_flag(nil | maybe_improper_list | map, any, any) :: any
+  @spec get_string_flag(map(), String.t(), String.t()) :: String.t()
   def get_string_flag(feature_flags, code, default_value) do
     cond do
       not is_nil(feature_flags[code]) ->
@@ -156,7 +153,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     corresponding values from object or error-messages
   """
 
-  @spec get_integer_flag(nil | maybe_improper_list | map, any) :: any
+  @spec get_integer_flag(map(), String.t()) :: integer() | String.t()
   def get_integer_flag(feature_flags, code) do
     cond do
       not is_nil(feature_flags[code]) ->
@@ -171,7 +168,7 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
     end
   end
 
-  @spec get_integer_flag(nil | maybe_improper_list | map, any, any) :: any
+  @spec get_integer_flag(map(), String.t(), integer()) :: integer() | String.t()
   def get_integer_flag(feature_flags, code, default_value) do
     cond do
       not is_nil(feature_flags[code]) ->
