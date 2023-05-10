@@ -11,51 +11,57 @@ defmodule FeatureFlagsHelperTest do
   describe "get_flag/2 action" do
     test "returns detailed map for any certain code" do
       assert FeatureFlagsHelper.get_flag(@feature_flags, "theme") == %{
-        "code" => "theme",
-        "is_default" => false,
-        "type" => "string",
-        "value" => "grayscale"
-      }
+               "code" => "theme",
+               "is_default" => false,
+               "type" => "string",
+               "value" => "grayscale"
+             }
     end
 
     test "returns error-message when unknown-code is passed" do
-      assert FeatureFlagsHelper.get_flag(@feature_flags, "unknown_flag_code") == "This flag does not exist, and no default value provided"
-      assert FeatureFlagsHelper.get_flag(@feature_flags, "another_invalid_code") == "This flag does not exist, and no default value provided"
+      assert FeatureFlagsHelper.get_flag(@feature_flags, "unknown_flag_code") ==
+               "This flag does not exist, and no default value provided"
+
+      assert FeatureFlagsHelper.get_flag(@feature_flags, "another_invalid_code") ==
+               "This flag does not exist, and no default value provided"
     end
   end
 
   describe "get_flag/3 action" do
     test "returns detailed map for any certain code, despite of any default-value provided" do
       assert FeatureFlagsHelper.get_flag(@feature_flags, "theme", "pink") == %{
-        "code" => "theme",
-        "is_default" => false,
-        "type" => "string",
-        "value" => "grayscale"
-      }
+               "code" => "theme",
+               "is_default" => false,
+               "type" => "string",
+               "value" => "grayscale"
+             }
     end
 
     test "returns customized-map for any certain code (which doesn't exists), but default-value provided" do
       assert FeatureFlagsHelper.get_flag(@feature_flags, "unknown_flag_code", "pink") == %{
-        "code" => "unknown_flag_code",
-        "is_default" => true,
-        "value" => "pink"
-      }
+               "code" => "unknown_flag_code",
+               "is_default" => true,
+               "value" => "pink"
+             }
     end
   end
 
   describe "get_flag/4 action" do
     test "returns detailed map for any certain code, when flag-type matches the type of code" do
       assert FeatureFlagsHelper.get_flag(@feature_flags, "theme", "pink", "s") == %{
-        "code" => "theme",
-        "is_default" => false,
-        "type" => "string",
-        "value" => "grayscale"
-      }
+               "code" => "theme",
+               "is_default" => false,
+               "type" => "string",
+               "value" => "grayscale"
+             }
     end
 
     test "returns error-message when types are mis-matched" do
-      assert FeatureFlagsHelper.get_flag(@feature_flags, "theme", "pink", "i") == "The flag type was provided as integer, but it is an string"
-      assert FeatureFlagsHelper.get_flag(@feature_flags, "counter", 34, "s") == "The flag type was provided as string, but it is an integer"
+      assert FeatureFlagsHelper.get_flag(@feature_flags, "theme", "pink", "i") ==
+               "The flag type was provided as integer, but it is an string"
+
+      assert FeatureFlagsHelper.get_flag(@feature_flags, "counter", 34, "s") ==
+               "The flag type was provided as string, but it is an integer"
     end
   end
 
@@ -65,11 +71,13 @@ defmodule FeatureFlagsHelperTest do
     end
 
     test "returns error-message, if you try to fetch non-boolean flag from it" do
-      assert FeatureFlagsHelper.get_boolean_flag(@feature_flags, "theme") == "Error - Flag theme is of type string not boolean"
+      assert FeatureFlagsHelper.get_boolean_flag(@feature_flags, "theme") ==
+               "Error - Flag theme is of type string not boolean"
     end
 
     test "returns error-message, if flag is invalid, and doesn't exists" do
-      assert FeatureFlagsHelper.get_boolean_flag(@feature_flags, "unknown_flag") == "Error - flag does not exist and no default provided"
+      assert FeatureFlagsHelper.get_boolean_flag(@feature_flags, "unknown_flag") ==
+               "Error - flag does not exist and no default provided"
     end
   end
 
@@ -89,11 +97,13 @@ defmodule FeatureFlagsHelperTest do
     end
 
     test "returns error-message, if you try to fetch non-string flag from it" do
-      assert FeatureFlagsHelper.get_string_flag(@feature_flags, "is_dark_mode") == "Error - Flag is_dark_mode is of type boolean not string"
+      assert FeatureFlagsHelper.get_string_flag(@feature_flags, "is_dark_mode") ==
+               "Error - Flag is_dark_mode is of type boolean not string"
     end
 
     test "returns error-message, if flag is invalid, nor doesn't exists" do
-      assert FeatureFlagsHelper.get_string_flag(@feature_flags, "unknown_flag") == "Error - flag does not exist and no default provided"
+      assert FeatureFlagsHelper.get_string_flag(@feature_flags, "unknown_flag") ==
+               "Error - flag does not exist and no default provided"
     end
   end
 
@@ -113,11 +123,13 @@ defmodule FeatureFlagsHelperTest do
     end
 
     test "returns error-message, if you try to fetch non-integer flag from it" do
-      assert FeatureFlagsHelper.get_integer_flag(@feature_flags, "is_dark_mode") == "Error - Flag is_dark_mode is of type boolean not integer"
+      assert FeatureFlagsHelper.get_integer_flag(@feature_flags, "is_dark_mode") ==
+               "Error - Flag is_dark_mode is of type boolean not integer"
     end
 
     test "returns error-message, if flag is invalid + doesn't exists" do
-      assert FeatureFlagsHelper.get_integer_flag(@feature_flags, "unknown_flag") == "Error - flag does not exist and no default provided"
+      assert FeatureFlagsHelper.get_integer_flag(@feature_flags, "unknown_flag") ==
+               "Error - flag does not exist and no default provided"
     end
   end
 

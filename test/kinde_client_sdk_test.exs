@@ -218,25 +218,33 @@ defmodule KindeClientSDKTest do
       {conn, client} = ClientTestHelper.initialize_valid_client(conn, :client_credentials)
       conn = ClientTestHelper.mock_token(conn, client.cache_pid)
       conn = KindeClientSDK.login(conn, client)
-      assert KindeClientSDK.get_claim(conn, "iss") == %{name: "iss", value: Application.get_env(:kinde_sdk, :domain)}
+
+      assert KindeClientSDK.get_claim(conn, "iss") == %{
+               name: "iss",
+               value: Application.get_env(:kinde_sdk, :domain)
+             }
     end
 
-    test "throws missing-required-auth-cred error when not called with proper creds", %{conn: conn} do
-      {conn, client} = KindeClientSDK.init(
-        conn,
-        Application.get_env(:kinde_sdk, :domain),
-        "http://localhost:4000/pkce-callback",
-        "2e41e9e798004177b1b44aa1e1ad3d62",
-        Application.get_env(:kinde_sdk, :client_secret),
-        :authorization_code_flow_pkce,
-        "http://localhost:4000/logout"
-      )
+    test "throws missing-required-auth-cred error when not called with proper creds", %{
+      conn: conn
+    } do
+      {conn, client} =
+        KindeClientSDK.init(
+          conn,
+          Application.get_env(:kinde_sdk, :domain),
+          "http://localhost:4000/pkce-callback",
+          "2e41e9e798004177b1b44aa1e1ad3d62",
+          Application.get_env(:kinde_sdk, :client_secret),
+          :authorization_code_flow_pkce,
+          "http://localhost:4000/logout"
+        )
 
       conn = ClientTestHelper.mock_token(conn, client.cache_pid)
 
       conn = KindeClientSDK.login(conn, client)
+
       assert catch_throw(KindeClientSDK.get_permissions(conn)) ==
-        "Request is missing required authentication credential"
+               "Request is missing required authentication credential"
     end
   end
 end
