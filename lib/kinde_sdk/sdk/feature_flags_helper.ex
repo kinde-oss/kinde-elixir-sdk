@@ -105,7 +105,11 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
   def get_boolean_flag(feature_flags, code, default_value) do
     cond do
       not is_nil(feature_flags[code]) ->
-        feature_flags[code]["v"]
+        if feature_flags[code]["t"] |> get_type() == "boolean" do
+          feature_flags[code]["v"]
+        else
+          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not boolean"
+        end
 
       is_nil(feature_flags[code]) ->
         default_value
@@ -138,7 +142,11 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
   def get_string_flag(feature_flags, code, default_value) do
     cond do
       not is_nil(feature_flags[code]) ->
-        feature_flags[code]["v"]
+        if feature_flags[code]["t"] |> get_type() == "string" do
+          feature_flags[code]["v"]
+        else
+          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not string"
+        end
 
       is_nil(feature_flags[code]) ->
         default_value
@@ -172,7 +180,11 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
   def get_integer_flag(feature_flags, code, default_value) do
     cond do
       not is_nil(feature_flags[code]) ->
-        feature_flags[code]["v"]
+        if feature_flags[code]["t"] |> get_type() == "integer" do
+          feature_flags[code]["v"]
+        else
+          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not integer"
+        end
 
       is_nil(feature_flags[code]) ->
         default_value
