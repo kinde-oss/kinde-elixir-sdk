@@ -228,7 +228,7 @@ You can override this by passing scope into the KindeSDK.
 | get_token     | Returns the raw access token from URL after logged from Kinde    | conn | ```KindeClientSDK.get_token(conn)```   | 
 | create_org    | Constructs redirect url and sends user to Kinde to sign up and create a new org for your business | conn, client  | ```KindeClientSDK.create_org(conn, client)``` |
 | get_claims     | Gets all claims from an access or id token   | conn, atom | ```KindeClientSDK.get_claims(conn)``` or ```KindeClientSDK.get_claims(conn, :id_token)```  |
-| get_claim     | Gets a claim from an access or id token   | conn, string, atom | ```KindeClientSDK.get_claim(conn, "jti")``` or ```KindeClientSDK.get_claim(conn, "jti", :id_token)```  |
+| get_claim     | Gets a claim-object from an access or id token   | conn, string, atom | ```KindeClientSDK.get_claim(conn, "jti")``` or ```KindeClientSDK.get_claim(conn, "jti", :id_token)```  |
 | get_permissions   | Returns the state of a all permissions   | conn, atom  | ```KindeClientSDK.get_permissions(conn, :id_token)```   |
 | get_permission   | Returns the state of a given permission   | conn, string  | ```KindeClientSDK.get_permission(conn, "create:users")```   |
 | get_organization | Get details for the organization your user is logged into     | conn | ```KindeClientSDK.get_user_organization(conn)```     |
@@ -238,3 +238,17 @@ You can override this by passing scope into the KindeSDK.
 | save_kinde_client | Saves the Kinde client created into the `conn` | conn | ```KindeClientSDK.save_kinde_client(conn)``` |
 | get_kinde_client | Returns the Kinde client created from the `conn` | conn | ```KindeClientSDK.get_kinde_client(conn)``` |
 | get_all_data | Returns all the Kinde data (tokens) returned | conn | ```KindeClientSDK.get_all_data(conn)``` |
+
+## Feature Flag Helper Functions
+
+| Function | Description | Arguments | Usage |
+| -------- | ---- | ----------- | ------- |
+| get_flag/2   | Detail of any certain feature-flag    | feature_flags, code  | ```FeatureFlagsHelper.get_flag(feature_flags, code)```   |
+| get_flag/3     | Detail of any certain feature-flag    | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_flag(feature_flags, code, default_value)```   |
+| get_flag/4  | Detail of any certain feature-flag    | feature_flags, code, default_value, flag_type | ```FeatureFlagsHelper.get_flag(feature_flags, code, default_value, flag_type)```  |
+| get_boolean_flag/2     | Returns the boolean-flag from feature_flags_map    | feature_flags, code | ```FeatureFlagsHelper.get_boolean_flag(feature_flags, code)```   | 
+| get_boolean_flag/3    | Returns the boolean-flag from feature_flags_map | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_boolean_flag(feature_flags, code, default_value)``` |
+| get_string_flag/2     | Returns the string-flag from feature_flags_map    | feature_flags, code | ```FeatureFlagsHelper.get_string_flag(feature_flags, code)```   | 
+| get_string_flag/3    | Returns the string-flag from feature_flags_map | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_string_flag(feature_flags, code, default_value)``` |
+| get_integer_flag/2     | Returns the integer-flag from feature_flags_map    | feature_flags, code | ```FeatureFlagsHelper.get_integer_flag(feature_flags, code)```   | 
+| get_integer_flag/3    | Returns the integer-flag from feature_flags_map | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_integer_flag(feature_flags, code, default_value)``` |
