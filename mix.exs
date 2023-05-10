@@ -46,7 +46,7 @@ defmodule KindeSDK.Mixfile do
   defp package do
     [
       name: "kinde_sdk",
-      files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
+      files: ~w(config lib test .formatter.exs .gitignore LICENSE* mix.exs README*),
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/kinde-oss/kinde-elixir-sdk"}
     ]
