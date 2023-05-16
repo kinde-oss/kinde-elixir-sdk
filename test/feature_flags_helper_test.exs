@@ -58,10 +58,10 @@ defmodule FeatureFlagsHelperTest do
 
     test "returns error-message when types are mis-matched" do
       assert FeatureFlagsHelper.get_flag(@feature_flags, "theme", "pink", "i") ==
-               "The flag type was provided as integer, but it is an string"
+               "The flag type was provided as integer, but it is string"
 
       assert FeatureFlagsHelper.get_flag(@feature_flags, "counter", 34, "s") ==
-               "The flag type was provided as string, but it is an integer"
+               "The flag type was provided as string, but it is integer"
     end
   end
 

@@ -38,42 +38,42 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
   """
   @spec get_flag(map(), String.t()) :: map() | String.t()
   def get_flag(feature_flags, code) do
-    cond do
-      not is_nil(feature_flags[code]) ->
+    case feature_flags[code] do
+      nil ->
+        "This flag does not exist, and no default value provided"
+
+      %{"t" => flag_type, "v" => value} ->
         %{
           "code" => code,
-          "type" => get_type(feature_flags[code]),
-          "value" => feature_flags[code]["v"],
+          "type" => get_type(flag_type),
+          "value" => value,
           "is_default" => false
         }
-
-      true ->
-        "This flag does not exist, and no default value provided"
     end
   end
 
   @spec get_flag(map(), String.t(), any()) :: map() | String.t()
   def get_flag(feature_flags, code, default_value) do
-    cond do
-      is_nil(feature_flags[code]) and default_value ->
+    case feature_flags[code] do
+      nil ->
         %{
           "code" => code,
           "value" => default_value,
           "is_default" => true
         }
 
-      true ->
+      _ ->
         get_flag(feature_flags, code)
     end
   end
 
   @spec get_flag(map(), String.t(), any(), String.t()) :: map() | String.t()
   def get_flag(feature_flags, code, default_value, flag_type) do
-    cond do
-      feature_flags[code]["t"] != flag_type ->
-        "The flag type was provided as #{get_type(flag_type)}, but it is an #{get_type(feature_flags[code]["t"])}"
+    case feature_flags[code] do
+      %{"t" => actual_type} when actual_type != flag_type ->
+        "The flag type was provided as #{get_type(flag_type)}, but it is #{get_type(actual_type)}"
 
-      true ->
+      _ ->
         get_flag(feature_flags, code, default_value)
     end
   end
@@ -88,31 +88,29 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
 
   @spec get_boolean_flag(map(), String.t()) :: boolean() | String.t()
   def get_boolean_flag(feature_flags, code) do
-    cond do
-      not is_nil(feature_flags[code]) ->
-        if feature_flags[code]["t"] |> get_type() == "boolean" do
-          feature_flags[code]["v"]
-        else
-          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not boolean"
-        end
+    case feature_flags[code] do
+      %{"t" => "b", "v" => value} ->
+        value
 
-      true ->
+      %{"t" => type} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not boolean"
+
+      _ ->
         "Error - flag does not exist and no default provided"
     end
   end
 
   @spec get_boolean_flag(map(), String.t(), boolean()) :: boolean() | String.t()
   def get_boolean_flag(feature_flags, code, default_value) do
-    cond do
-      not is_nil(feature_flags[code]) ->
-        if feature_flags[code]["t"] |> get_type() == "boolean" do
-          feature_flags[code]["v"]
-        else
-          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not boolean"
-        end
-
-      is_nil(feature_flags[code]) ->
+    case feature_flags[code] do
+      nil ->
         default_value
+
+      %{"t" => "b", "v" => value} ->
+        value
+
+      %{"t" => type, "v" => _} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not boolean"
     end
   end
 
@@ -125,31 +123,29 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
   """
   @spec get_string_flag(map(), String.t()) :: String.t()
   def get_string_flag(feature_flags, code) do
-    cond do
-      not is_nil(feature_flags[code]) ->
-        if feature_flags[code]["t"] |> get_type() == "string" do
-          feature_flags[code]["v"]
-        else
-          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not string"
-        end
+    case feature_flags[code] do
+      %{"t" => "s", "v" => value} ->
+        value
 
-      true ->
+      %{"t" => type} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not string"
+
+      _ ->
         "Error - flag does not exist and no default provided"
     end
   end
 
   @spec get_string_flag(map(), String.t(), String.t()) :: String.t()
   def get_string_flag(feature_flags, code, default_value) do
-    cond do
-      not is_nil(feature_flags[code]) ->
-        if feature_flags[code]["t"] |> get_type() == "string" do
-          feature_flags[code]["v"]
-        else
-          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not string"
-        end
-
-      is_nil(feature_flags[code]) ->
+    case feature_flags[code] do
+      nil ->
         default_value
+
+      %{"t" => "s", "v" => value} ->
+        value
+
+      %{"t" => type, "v" => _} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not string"
     end
   end
 
@@ -163,31 +159,29 @@ defmodule KindeSdk.Sdk.FeatureFlagsHelper do
 
   @spec get_integer_flag(map(), String.t()) :: integer() | String.t()
   def get_integer_flag(feature_flags, code) do
-    cond do
-      not is_nil(feature_flags[code]) ->
-        if feature_flags[code]["t"] |> get_type() == "integer" do
-          feature_flags[code]["v"]
-        else
-          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not integer"
-        end
+    case feature_flags[code] do
+      %{"t" => "i", "v" => value} ->
+        value
 
-      true ->
+      %{"t" => type} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not integer"
+
+      _ ->
         "Error - flag does not exist and no default provided"
     end
   end
 
   @spec get_integer_flag(map(), String.t(), integer()) :: integer() | String.t()
   def get_integer_flag(feature_flags, code, default_value) do
-    cond do
-      not is_nil(feature_flags[code]) ->
-        if feature_flags[code]["t"] |> get_type() == "integer" do
-          feature_flags[code]["v"]
-        else
-          "Error - Flag #{code} is of type #{feature_flags[code]["t"] |> get_type()} not integer"
-        end
-
-      is_nil(feature_flags[code]) ->
+    case feature_flags[code] do
+      nil ->
         default_value
+
+      %{"t" => "i", "v" => value} ->
+        value
+
+      %{"t" => type, "v" => _} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not integer"
     end
   end
 
