@@ -84,4 +84,14 @@ defmodule KindeSDK.SDK.Utils do
     |> String.replace("~>", "")
     |> String.trim_leading()
   end
+
+  def calculate_expiring_timestamp(login_timestamp, expiring_in) do
+    {:ok, expiring_at} =
+      login_timestamp
+      |> DateTime.to_unix()
+      |> Kernel.+(expiring_in)
+      |> DateTime.from_unix()
+
+    expiring_at
+  end
 end

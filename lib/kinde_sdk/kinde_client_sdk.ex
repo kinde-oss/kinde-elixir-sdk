@@ -354,61 +354,99 @@ defmodule KindeClientSDK do
   defp do_get_token(conn, grant_type)
        when grant_type in [:authorization_code, :authorization_code_flow_pkce] do
     client = get_kinde_client(conn)
+    expiring_timestamp = return_key(client.cache_pid, :kinde_expiring_time_stamp)
 
-    new_grant_type = get_grant_type(client.grant_type)
+    if is_nil(expiring_timestamp) do
+      new_grant_type = get_grant_type(client.grant_type)
 
-    form_params = %{
-      client_id: client.client_id,
-      client_secret: client.client_secret,
-      grant_type: new_grant_type,
-      redirect_uri: client.redirect_uri,
-      response_type: :code
-    }
+      form_params = %{
+        client_id: client.client_id,
+        client_secret: client.client_secret,
+        grant_type: new_grant_type,
+        redirect_uri: client.redirect_uri,
+        response_type: :code
+      }
 
-    connection = Conn.fetch_query_params(conn)
-    params = connection.query_params
-    state = params["state"]
-    check_state_authentication(client.cache_pid, state)
+      connection = Conn.fetch_query_params(conn)
+      params = connection.query_params
+      state = params["state"]
+      check_state_authentication(client.cache_pid, state)
 
-    error = params["error"]
+      error = params["error"]
 
-    if !is_nil(error) do
-      error_description = params["error_description"]
-      message = if !is_nil(error_description), do: error_description, else: error
-      throw(message)
-    end
-
-    authorization_code = params["code"]
-    if is_nil(authorization_code), do: throw("Not found code param")
-    form_params = Map.put(form_params, :code, authorization_code)
-
-    data = get_all_data(conn)
-    code_verifier = data.oauth_code_verifier
-
-    form_params =
-      if !is_nil(code_verifier) do
-        Map.put(form_params, :code_verifier, code_verifier)
-      else
-        if client.grant_type == :authorization_code_flow_pkce do
-          throw("Not found code_verifier")
-        else
-          form_params
-        end
+      if !is_nil(error) do
+        error_description = params["error_description"]
+        message = if !is_nil(error_description), do: error_description, else: error
+        throw(message)
       end
 
-    form_params = Map.to_list(form_params)
-    body = {:form, form_params}
+      authorization_code = params["code"]
+      if is_nil(authorization_code), do: throw("Not found code param")
+      form_params = Map.put(form_params, :code, authorization_code)
 
-    {:ok, response} =
-      HTTPoison.post(client.token_endpoint, body, [
-        {"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}
-      ])
+      data = get_all_data(conn)
+      code_verifier = data.oauth_code_verifier
 
-    body = Jason.decode!(response.body)
+      form_params =
+        if !is_nil(code_verifier) do
+          Map.put(form_params, :code_verifier, code_verifier)
+        else
+          if client.grant_type == :authorization_code_flow_pkce do
+            throw("Not found code_verifier")
+          else
+            form_params
+          end
+        end
 
-    GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
+      form_params = Map.to_list(form_params)
+      body = {:form, form_params}
 
-    save_data_to_session(client.cache_pid, body)
+      {:ok, response} =
+        HTTPoison.post(client.token_endpoint, body, [
+          {"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}
+        ])
+
+      body = Jason.decode!(response.body)
+
+      GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
+
+      save_data_to_session(client.cache_pid, body)
+    else
+      cond do
+        DateTime.compare(expiring_timestamp, DateTime.utc_now()) == :gt ->
+          get_all_data(conn)
+
+        DateTime.compare(expiring_timestamp, DateTime.utc_now()) == :lt ->
+          form_params =
+            %{
+              client_id: client.client_id,
+              client_secret: client.client_secret,
+              grant_type: :refresh_token,
+              redirect_uri: client.redirect_uri,
+              refresh_token: return_key(client.cache_pid, :kinde_refresh_token)
+            }
+            |> Map.to_list()
+
+          body = {:form, form_params}
+
+          {:ok, response} =
+            HTTPoison.post(
+              client.token_endpoint,
+              body,
+              [
+                {"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}
+              ]
+            )
+
+          body = Jason.decode!(response.body)
+          GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
+          save_data_to_session(client.cache_pid, body)
+
+        true ->
+          "Access/Refresh Tokens are invalid"
+      end
+    end
+
     client = update_auth_status(client, :authenticated)
     save_kinde_client(conn, client)
 
@@ -423,11 +461,21 @@ defmodule KindeClientSDK do
     expires_in = if is_nil(token["expires_in"]), do: 0, else: token["expires_in"]
 
     GenServer.cast(pid, {:add_kinde_data, {:kinde_login_time_stamp, DateTime.utc_now()}})
+
+    GenServer.cast(
+      pid,
+      {:add_kinde_data,
+       {:kinde_expiring_time_stamp,
+        Utils.calculate_expiring_timestamp(DateTime.utc_now(), expires_in)}}
+    )
+
     GenServer.cast(pid, {:add_kinde_data, {:kinde_access_token, token["access_token"]}})
     GenServer.cast(pid, {:add_kinde_data, {:kinde_id_token, token["id_token"]}})
+    GenServer.cast(pid, {:add_kinde_data, {:kinde_refresh_token, token["refresh_token"]}})
     GenServer.cast(pid, {:add_kinde_data, {:kinde_expires_in, expires_in}})
 
-    payload = Utils.parse_jwt(token["id_token"])
+    IO.inspect payload = Utils.parse_jwt(token["id_token"]), label: "id_token payload"
+    IO.inspect Utils.parse_jwt(token["access_token"]), label: "access_token payload"
 
     if !is_nil(payload) do
       user = %{
@@ -739,9 +787,11 @@ defmodule KindeClientSDK do
   """
   @spec get_all_data(Plug.Conn.t()) :: %{
           access_token: any,
+          refresh_token: any,
           expires_in: any,
           id_token: any,
           login_time_stamp: any,
+          expiring_time_stamp: any,
           token: any,
           user: any,
           oauth_code_verifier: any
@@ -751,7 +801,9 @@ defmodule KindeClientSDK do
 
     %{
       login_time_stamp: return_key(pid, :kinde_login_time_stamp),
+      expiring_time_stamp: return_key(pid, :kinde_expiring_time_stamp),
       access_token: return_key(pid, :kinde_access_token),
+      refresh_token: return_key(pid, :kinde_refresh_token),
       id_token: return_key(pid, :kinde_id_token),
       expires_in: return_key(pid, :kinde_expires_in),
       token: return_key(pid, :kinde_token),
