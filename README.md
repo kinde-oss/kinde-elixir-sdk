@@ -239,12 +239,12 @@ You can override this by passing scope into the KindeSDK.
 
 | Function | Description | Arguments | Usage |
 | -------- | ---- | ----------- | ------- |
-| get_flag/2   | Detail of any certain feature-flag    | feature_flags, code  | ```FeatureFlagsHelper.get_flag(feature_flags, code)```   |
-| get_flag/3     | Detail of any certain feature-flag    | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_flag(feature_flags, code, default_value)```   |
-| get_flag/4  | Detail of any certain feature-flag    | feature_flags, code, default_value, flag_type | ```FeatureFlagsHelper.get_flag(feature_flags, code, default_value, flag_type)```  |
-| get_boolean_flag/2     | Returns the boolean-flag from feature_flags_map    | feature_flags, code | ```FeatureFlagsHelper.get_boolean_flag(feature_flags, code)```   | 
-| get_boolean_flag/3    | Returns the boolean-flag from feature_flags_map | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_boolean_flag(feature_flags, code, default_value)``` |
-| get_string_flag/2     | Returns the string-flag from feature_flags_map    | feature_flags, code | ```FeatureFlagsHelper.get_string_flag(feature_flags, code)```   | 
-| get_string_flag/3    | Returns the string-flag from feature_flags_map | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_string_flag(feature_flags, code, default_value)``` |
-| get_integer_flag/2     | Returns the integer-flag from feature_flags_map    | feature_flags, code | ```FeatureFlagsHelper.get_integer_flag(feature_flags, code)```   | 
-| get_integer_flag/3    | Returns the integer-flag from feature_flags_map | feature_flags, code, default_value  | ```FeatureFlagsHelper.get_integer_flag(feature_flags, code, default_value)``` |
+| get_flag/2   | Detail of any certain feature-flag    | feature_flags, code  | ```KindeClientSDK.get_flag(feature_flags, code)```   |
+| get_flag/3     | Detail of any certain feature-flag    | feature_flags, code, default_value  | ```KindeClientSDK.get_flag(feature_flags, code, default_value)```   |
+| get_flag/4  | Detail of any certain feature-flag    | feature_flags, code, default_value, flag_type | ```KindeClientSDK.get_flag(feature_flags, code, default_value, flag_type)```  |
+| get_boolean_flag/2     | Returns the boolean-flag from feature_flags_map    | feature_flags, code | ```KindeClientSDK.get_boolean_flag(feature_flags, code)```   | 
+| get_boolean_flag/3    | Returns the boolean-flag from feature_flags_map | feature_flags, code, default_value  | ```KindeClientSDK.get_boolean_flag(feature_flags, code, default_value)``` |
+| get_string_flag/2     | Returns the string-flag from feature_flags_map    | feature_flags, code | ```KindeClientSDK.get_string_flag(feature_flags, code)```   | 
+| get_string_flag/3    | Returns the string-flag from feature_flags_map | feature_flags, code, default_value  | ```KindeClientSDK.get_string_flag(feature_flags, code, default_value)``` |
+| get_integer_flag/2     | Returns the integer-flag from feature_flags_map    | feature_flags, code | ```KindeClientSDK.get_integer_flag(feature_flags, code)```   | 
+| get_integer_flag/3    | Returns the integer-flag from feature_flags_map | feature_flags, code, default_value  | ```KindeClientSDK.get_integer_flag(feature_flags, code, default_value)``` |
