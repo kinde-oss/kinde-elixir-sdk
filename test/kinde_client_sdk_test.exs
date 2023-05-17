@@ -5,7 +5,7 @@ defmodule KindeClientSDKTest do
   alias KindeClientSDK
   alias Plug.Conn
 
-  @domain Application.get_env(:kinde_sdk, :domain)
+  @domain Application.compile_env(:kinde_sdk, :domain)
   @grant_type :client_credentials
 
   setup_all do

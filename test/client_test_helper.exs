@@ -2,11 +2,11 @@ defmodule ClientTestHelper do
   alias KindeClientSDK
   alias KindeSDK.SDK.Utils
 
-  @redirect_url Application.get_env(:kinde_sdk, :redirect_url)
-  @client_id Application.get_env(:kinde_sdk, :backend_client_id)
-  @client_secret Application.get_env(:kinde_sdk, :client_secret)
-  @logout_redirect_url Application.get_env(:kinde_sdk, :logout_redirect_url)
-  @valid_domain Application.get_env(:kinde_sdk, :domain)
+  @redirect_url Application.compile_env(:kinde_sdk, :redirect_url)
+  @client_id Application.compile_env(:kinde_sdk, :backend_client_id)
+  @client_secret Application.compile_env(:kinde_sdk, :client_secret)
+  @logout_redirect_url Application.compile_env(:kinde_sdk, :logout_redirect_url)
+  @valid_domain Application.compile_env(:kinde_sdk, :domain)
   @invalid_domain "test.c"
 
   def initialize_valid_client(conn, grant_type) do

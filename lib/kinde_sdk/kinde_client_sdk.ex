@@ -474,8 +474,7 @@ defmodule KindeClientSDK do
     GenServer.cast(pid, {:add_kinde_data, {:kinde_refresh_token, token["refresh_token"]}})
     GenServer.cast(pid, {:add_kinde_data, {:kinde_expires_in, expires_in}})
 
-    IO.inspect payload = Utils.parse_jwt(token["id_token"]), label: "id_token payload"
-    IO.inspect Utils.parse_jwt(token["access_token"]), label: "access_token payload"
+    payload = Utils.parse_jwt(token["id_token"])
 
     if !is_nil(payload) do
       user = %{
