@@ -365,10 +365,13 @@ defmodule KindeClientSDK do
     }
 
     if is_nil(expiring_timestamp) do
-      %{"state" => state, "code" => authorization_code} = Conn.fetch_query_params(conn).query_params
+      %{"state" => state, "code" => authorization_code} =
+        Conn.fetch_query_params(conn).query_params
+
       check_state_authentication(client.cache_pid, state)
 
       error = Conn.fetch_query_params(conn).query_params["error"]
+
       if error do
         error_description = Conn.fetch_query_params(conn).query_params["error_description"]
         message = error_description || error
@@ -808,8 +811,10 @@ defmodule KindeClientSDK do
       "value" => "grayscale"
     }
   """
-  @spec get_flag(map(), String.t()) :: map() | String.t()
-  def get_flag(feature_flags, code) do
+  @spec get_flag(Plug.Conn.t(), String.t()) :: map() | String.t()
+  def get_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       nil ->
         "This flag does not exist, and no default value provided"
@@ -824,8 +829,10 @@ defmodule KindeClientSDK do
     end
   end
 
-  @spec get_flag(map(), String.t(), any()) :: map() | String.t()
-  def get_flag(feature_flags, code, default_value) do
+  @spec get_flag(Plug.Conn.t(), String.t(), any()) :: map() | String.t()
+  def get_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       nil ->
         %{
@@ -835,18 +842,20 @@ defmodule KindeClientSDK do
         }
 
       _ ->
-        get_flag(feature_flags, code)
+        get_flag(conn, code)
     end
   end
 
-  @spec get_flag(map(), String.t(), any(), String.t()) :: map() | String.t()
-  def get_flag(feature_flags, code, default_value, flag_type) do
+  @spec get_flag(Plug.Conn.t(), String.t(), any(), String.t()) :: map() | String.t()
+  def get_flag(conn, code, default_value, flag_type) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       %{"t" => actual_type} when actual_type != flag_type ->
         "The flag type was provided as #{get_type(flag_type)}, but it is #{get_type(actual_type)}"
 
       _ ->
-        get_flag(feature_flags, code, default_value)
+        get_flag(conn, code, default_value)
     end
   end
 
@@ -857,9 +866,10 @@ defmodule KindeClientSDK do
 
     true, false or error-messages
   """
+  @spec get_boolean_flag(Plug.Conn.t(), String.t()) :: boolean() | String.t()
+  def get_boolean_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
 
-  @spec get_boolean_flag(map(), String.t()) :: boolean() | String.t()
-  def get_boolean_flag(feature_flags, code) do
     case feature_flags[code] do
       %{"t" => "b", "v" => value} ->
         value
@@ -872,8 +882,10 @@ defmodule KindeClientSDK do
     end
   end
 
-  @spec get_boolean_flag(map(), String.t(), boolean()) :: boolean() | String.t()
-  def get_boolean_flag(feature_flags, code, default_value) do
+  @spec get_boolean_flag(Plug.Conn.t(), String.t(), boolean()) :: boolean() | String.t()
+  def get_boolean_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       nil ->
         default_value
@@ -893,8 +905,10 @@ defmodule KindeClientSDK do
 
     corresponding values from object or error-messages
   """
-  @spec get_string_flag(map(), String.t()) :: String.t()
-  def get_string_flag(feature_flags, code) do
+  @spec get_string_flag(Plug.Conn.t(), String.t()) :: String.t()
+  def get_string_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       %{"t" => "s", "v" => value} ->
         value
@@ -907,8 +921,10 @@ defmodule KindeClientSDK do
     end
   end
 
-  @spec get_string_flag(map(), String.t(), String.t()) :: String.t()
-  def get_string_flag(feature_flags, code, default_value) do
+  @spec get_string_flag(Plug.Conn.t(), String.t(), String.t()) :: String.t()
+  def get_string_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       nil ->
         default_value
@@ -929,8 +945,10 @@ defmodule KindeClientSDK do
     corresponding values from object or error-messages
   """
 
-  @spec get_integer_flag(map(), String.t()) :: integer() | String.t()
-  def get_integer_flag(feature_flags, code) do
+  @spec get_integer_flag(Plug.Conn.t(), String.t()) :: integer() | String.t()
+  def get_integer_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       %{"t" => "i", "v" => value} ->
         value
@@ -943,8 +961,10 @@ defmodule KindeClientSDK do
     end
   end
 
-  @spec get_integer_flag(map(), String.t(), integer()) :: integer() | String.t()
-  def get_integer_flag(feature_flags, code, default_value) do
+  @spec get_integer_flag(Plug.Conn.t(), String.t(), integer()) :: integer() | String.t()
+  def get_integer_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
     case feature_flags[code] do
       nil ->
         default_value

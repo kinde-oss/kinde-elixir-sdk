@@ -229,15 +229,7 @@ defmodule KindeClientSDKTest do
       conn: conn
     } do
       {conn, client} =
-        KindeClientSDK.init(
-          conn,
-          Application.get_env(:kinde_sdk, :domain),
-          "http://localhost:4000/pkce-callback",
-          "2e41e9e798004177b1b44aa1e1ad3d62",
-          Application.get_env(:kinde_sdk, :client_secret),
-          :authorization_code_flow_pkce,
-          "http://localhost:4000/logout"
-        )
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
 
       conn = ClientTestHelper.mock_token(conn, client.cache_pid)
 
@@ -248,15 +240,21 @@ defmodule KindeClientSDKTest do
     end
   end
 
-  @feature_flags %{
-    "counter" => %{"t" => "i", "v" => 55},
-    "is_dark_mode" => %{"t" => "b", "v" => true},
-    "theme" => %{"t" => "s", "v" => "grayscale"}
-  }
+  ### Tip: For below testsuite to work properly, you need to add the below mentioned feature-flags in your kinde-account
+  # %{
+  #   "counter" => %{"t" => "integer", "v" => 55},
+  #   "is_dark_mode" => %{"t" => "boolean", "v" => true},
+  #   "theme" => %{"t" => "string", "v" => "grayscale"}
+  # }
 
   describe "get_flag/2 action" do
-    test "returns detailed map for any certain code" do
-      assert KindeClientSDK.get_flag(@feature_flags, "theme") == %{
+    test "returns detailed map for any certain code", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_flag(conn, "theme") == %{
                "code" => "theme",
                "is_default" => false,
                "type" => "string",
@@ -264,18 +262,30 @@ defmodule KindeClientSDKTest do
              }
     end
 
-    test "returns error-message when unknown-code is passed" do
-      assert KindeClientSDK.get_flag(@feature_flags, "unknown_flag_code") ==
+    test "returns error-message when unknown-code is passed", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_flag(conn, "unknown_flag_code") ==
                "This flag does not exist, and no default value provided"
 
-      assert KindeClientSDK.get_flag(@feature_flags, "another_invalid_code") ==
+      assert KindeClientSDK.get_flag(conn, "another_invalid_code") ==
                "This flag does not exist, and no default value provided"
     end
   end
 
   describe "get_flag/3 action" do
-    test "returns detailed map for any certain code, despite of any default-value provided" do
-      assert KindeClientSDK.get_flag(@feature_flags, "theme", "pink") == %{
+    test "returns detailed map for any certain code, despite of any default-value provided", %{
+      conn: conn
+    } do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_flag(conn, "theme", "pink") == %{
                "code" => "theme",
                "is_default" => false,
                "type" => "string",
@@ -283,8 +293,14 @@ defmodule KindeClientSDKTest do
              }
     end
 
-    test "returns customized-map for any certain code (which doesn't exists), but default-value provided" do
-      assert KindeClientSDK.get_flag(@feature_flags, "unknown_flag_code", "pink") == %{
+    test "returns customized-map for any certain code (which doesn't exists), but default-value provided",
+         %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_flag(conn, "unknown_flag_code", "pink") == %{
                "code" => "unknown_flag_code",
                "is_default" => true,
                "value" => "pink"
@@ -293,8 +309,15 @@ defmodule KindeClientSDKTest do
   end
 
   describe "get_flag/4 action" do
-    test "returns detailed map for any certain code, when flag-type matches the type of code" do
-      assert KindeClientSDK.get_flag(@feature_flags, "theme", "pink", "s") == %{
+    test "returns detailed map for any certain code, when flag-type matches the type of code", %{
+      conn: conn
+    } do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_flag(conn, "theme", "pink", "s") == %{
                "code" => "theme",
                "is_default" => false,
                "type" => "string",
@@ -302,90 +325,164 @@ defmodule KindeClientSDKTest do
              }
     end
 
-    test "returns error-message when types are mis-matched" do
-      assert KindeClientSDK.get_flag(@feature_flags, "theme", "pink", "i") ==
+    test "returns error-message when types are mis-matched", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_flag(conn, "theme", "pink", "i") ==
                "The flag type was provided as integer, but it is string"
 
-      assert KindeClientSDK.get_flag(@feature_flags, "counter", 34, "s") ==
+      assert KindeClientSDK.get_flag(conn, "counter", 34, "s") ==
                "The flag type was provided as string, but it is integer"
     end
   end
 
   describe "get_boolean_flag/2 action" do
-    test "returns true/false, when boolean-flag is fetched" do
-      assert KindeClientSDK.get_boolean_flag(@feature_flags, "is_dark_mode") == true
+    test "returns true/false, when boolean-flag is fetched", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_boolean_flag(conn, "is_dark_mode") == false
     end
 
-    test "returns error-message, if you try to fetch non-boolean flag from it" do
-      assert KindeClientSDK.get_boolean_flag(@feature_flags, "theme") ==
+    test "returns error-message, if you try to fetch non-boolean flag from it", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_boolean_flag(conn, "theme") ==
                "Error - Flag theme is of type string not boolean"
     end
 
-    test "returns error-message, if flag is invalid, and doesn't exists" do
-      assert KindeClientSDK.get_boolean_flag(@feature_flags, "unknown_flag") ==
+    test "returns error-message, if flag is invalid, and doesn't exists", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_boolean_flag(conn, "unknown_flag") ==
                "Error - flag does not exist and no default provided"
     end
   end
 
   describe "get_boolean_flag/3 action" do
-    test "returns true/false, when boolean-flag is fetched, despite of what default-value is being passed" do
-      assert KindeClientSDK.get_boolean_flag(@feature_flags, "is_dark_mode", false) == true
+    test "returns true/false, when boolean-flag is fetched, despite of what default-value is being passed",
+         %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_boolean_flag(conn, "is_dark_mode", false) == false
     end
 
-    test "returns default-value, when unknown-flag is passed" do
-      assert KindeClientSDK.get_boolean_flag(@feature_flags, "unknown_flag", false) == false
+    test "returns default-value, when unknown-flag is passed", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_boolean_flag(conn, "unknown_flag", false) == false
     end
   end
 
   describe "get_string_flag/2 action" do
-    test "returns string-value, when string-flag is fetched" do
-      assert KindeClientSDK.get_string_flag(@feature_flags, "theme") == "grayscale"
+    test "returns string-value, when string-flag is fetched", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_string_flag(conn, "theme") == "grayscale"
     end
 
-    test "returns error-message, if you try to fetch non-string flag from it" do
-      assert KindeClientSDK.get_string_flag(@feature_flags, "is_dark_mode") ==
+    test "returns error-message, if you try to fetch non-string flag from it", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_string_flag(conn, "is_dark_mode") ==
                "Error - Flag is_dark_mode is of type boolean not string"
     end
 
-    test "returns error-message, if flag is invalid, nor doesn't exists" do
-      assert KindeClientSDK.get_string_flag(@feature_flags, "unknown_flag") ==
+    test "returns error-message, if flag is invalid, nor doesn't exists", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_string_flag(conn, "unknown_flag") ==
                "Error - flag does not exist and no default provided"
     end
   end
 
   describe "get_string_flag/3 action" do
-    test "returns string-value, when string-flag is fetched, despite of what default-value is being passed" do
-      assert KindeClientSDK.get_string_flag(@feature_flags, "theme", "pink") == "grayscale"
+    test "returns string-value, when string-flag is fetched, despite of what default-value is being passed",
+         %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_string_flag(conn, "theme", "pink") == "grayscale"
     end
 
-    test "returns default-value, when unknown-flag is passed" do
-      assert KindeClientSDK.get_string_flag(@feature_flags, "unknown_flag", "pink") == "pink"
+    test "returns default-value, when unknown-flag is passed", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_string_flag(conn, "unknown_flag", "pink") == "pink"
     end
   end
 
   describe "get_integer_flag/2 action" do
-    test "returns integer-value, when integer-flag is fetched" do
-      assert KindeClientSDK.get_integer_flag(@feature_flags, "counter") == 55
+    test "returns integer-value, when integer-flag is fetched", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_integer_flag(conn, "counter") == 55
     end
 
-    test "returns error-message, if you try to fetch non-integer flag from it" do
-      assert KindeClientSDK.get_integer_flag(@feature_flags, "is_dark_mode") ==
+    test "returns error-message, if you try to fetch non-integer flag from it", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_integer_flag(conn, "is_dark_mode") ==
                "Error - Flag is_dark_mode is of type boolean not integer"
     end
 
-    test "returns error-message, if flag is invalid + doesn't exists" do
-      assert KindeClientSDK.get_integer_flag(@feature_flags, "unknown_flag") ==
+    test "returns error-message, if flag is invalid + doesn't exists", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+
+      assert KindeClientSDK.get_integer_flag(conn, "unknown_flag") ==
                "Error - flag does not exist and no default provided"
     end
   end
 
   describe "get_integer_flag/3 action" do
-    test "returns integer-value, when integer-flag is fetched, despite of what default-value is being passed" do
-      assert KindeClientSDK.get_integer_flag(@feature_flags, "counter", 99) == 55
+    test "returns integer-value, when integer-flag is fetched, despite of what default-value is being passed",
+         %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_integer_flag(conn, "counter", 99) == 55
     end
 
-    test "returns default-value, when unknown-flag is passed" do
-      assert KindeClientSDK.get_integer_flag(@feature_flags, "unknown_flag", 99) == 99
+    test "returns default-value, when unknown-flag is passed", %{conn: conn} do
+      {conn, client} =
+        ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+      conn = ClientTestHelper.mock_feature_flags(conn, client.cache_pid)
+      assert KindeClientSDK.get_integer_flag(conn, "unknown_flag", 99) == 99
     end
   end
 end
