@@ -240,13 +240,6 @@ defmodule KindeClientSDKTest do
     end
   end
 
-  ### Tip: For below testsuite to work properly, you need to add the below mentioned feature-flags in your kinde-account
-  # %{
-  #   "counter" => %{"t" => "integer", "v" => 55},
-  #   "is_dark_mode" => %{"t" => "boolean", "v" => true},
-  #   "theme" => %{"t" => "string", "v" => "grayscale"}
-  # }
-
   describe "get_flag/2 action" do
     test "returns detailed map for any certain code", %{conn: conn} do
       {conn, client} =

@@ -802,14 +802,20 @@ defmodule KindeClientSDK do
 
     ### Returns
 
-    feature-flag map such as
+          feature-flag map such as
 
-    %{
-      "code" => "theme",
-      "is_default" => false,
-      "type" => "string",
-      "value" => "grayscale"
-    }
+          %{
+            "code" => "theme",
+            "is_default" => false,
+            "type" => "string",
+            "value" => "grayscale"
+          }
+
+    ### Usage
+
+          KindeClientSDK.get_flag(conn, "theme")
+          KindeClientSDK.get_flag(conn, "theme", "black")
+          KindeClientSDK.get_flag(conn, "theme", "black", "s")
   """
   @spec get_flag(Plug.Conn.t(), String.t()) :: map() | String.t()
   def get_flag(conn, code) do
@@ -864,7 +870,12 @@ defmodule KindeClientSDK do
 
     ### Returns
 
-    true, false or error-messages
+          true, false or error-messages
+
+    ### Usage
+
+          KindeClientSDK.get_boolean_flag(conn, "is_dark_mode")
+          KindeClientSDK.get_boolean_flag(conn, "is_dark_mode", false)
   """
   @spec get_boolean_flag(Plug.Conn.t(), String.t()) :: boolean() | String.t()
   def get_boolean_flag(conn, code) do
@@ -903,7 +914,12 @@ defmodule KindeClientSDK do
 
     ### Returns
 
-    corresponding values from object or error-messages
+          corresponding values from object or error-messages
+
+    ### Usage
+
+          KindeClientSDK.get_string_flag(conn, "theme")
+          KindeClientSDK.get_string_flag(conn, "theme", "black")
   """
   @spec get_string_flag(Plug.Conn.t(), String.t()) :: String.t()
   def get_string_flag(conn, code) do
@@ -942,7 +958,12 @@ defmodule KindeClientSDK do
 
     ### Returns
 
-    corresponding values from object or error-messages
+          corresponding values from object or error-messages
+
+    ### Usage
+
+          KindeClientSDK.get_integer_flag(conn, "counter")
+          KindeClientSDK.get_integer_flag(conn, "counter", 46)
   """
 
   @spec get_integer_flag(Plug.Conn.t(), String.t()) :: integer() | String.t()
