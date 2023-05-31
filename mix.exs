@@ -9,6 +9,7 @@ defmodule KindeSDK.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
+      aliases: aliases(),
       description: "Provides endpoints to manage your Kinde Businesses",
       deps: deps()
     ]
@@ -39,7 +40,9 @@ defmodule KindeSDK.Mixfile do
       {:plug, "~> 1.13"},
       {:plug_cowboy, "~> 2.0"},
       {:jason, "~> 1.3"},
-      {:httpoison, "~> 0.7"}
+      {:httpoison, "~> 0.7"},
+      {:envar, "~> 1.1.0"},
+      {:mock, "~> 0.3.0", only: :test}
     ]
   end
 
@@ -50,5 +53,21 @@ defmodule KindeSDK.Mixfile do
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/kinde-oss/kinde-elixir-sdk"}
     ]
+  end
+
+  # Aliases are shortcuts or tasks specific to the current project.
+  # For example, to install project dependencies and perform other setup tasks, run:
+  #
+  #     $ mix setup
+  #
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    [
+      test: [&clean_project/1, "test"]
+    ]
+  end
+
+  defp clean_project(_) do
+    System.cmd("rm", ["-rf", "_build"])
   end
 end

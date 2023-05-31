@@ -5,7 +5,9 @@ defmodule PkceTest do
   alias KindeClientSDK
   alias Plug.Conn
 
-  @domain Application.compile_env(:kinde_sdk, :domain)
+  import Mock
+
+  @domain Application.compile_env(:kinde_sdk, :domain) |> String.replace("\"", "")
   @grant_type :authorization_code_flow_pkce
 
   setup_all do
@@ -115,5 +117,61 @@ defmodule PkceTest do
     conn = KindeClientSDK.create_org(conn, client, additional_params_more)
 
     refute Enum.empty?(Conn.get_resp_header(conn, "location"))
+  end
+
+  test "valid pkce login", %{conn: conn} do
+    {conn, client} = ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+    conn = ClientTestHelper.mock_pkce_token(conn, client.cache_pid)
+    assert Map.get(KindeClientSDK.get_all_data(conn), :access_token) != nil
+    assert Map.get(KindeClientSDK.get_all_data(conn), :expires_in) != nil
+    assert Map.get(KindeClientSDK.get_all_data(conn), :id_token) != nil
+    assert Map.get(KindeClientSDK.get_all_data(conn), :refresh_token) != nil
+  end
+
+  test "returns old token if not expired", %{conn: conn} do
+    {conn, client} = ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+    conn = ClientTestHelper.mock_pkce_token(conn, client.cache_pid)
+    old_refresh_token = Map.get(KindeClientSDK.get_all_data(conn), :refresh_token)
+    old_access_token = Map.get(KindeClientSDK.get_all_data(conn), :access_token)
+    :timer.sleep(30)
+
+    conn =
+      with_mock KindeClientSDK,
+        get_token: fn _ ->
+          ClientTestHelper.mock_pkce_token(conn, client.cache_pid)
+        end do
+        KindeClientSDK.get_token(conn)
+      end
+
+    new_refresh_token = Map.get(KindeClientSDK.get_all_data(conn), :refresh_token)
+    new_access_token = Map.get(KindeClientSDK.get_all_data(conn), :access_token)
+
+    assert old_refresh_token == new_refresh_token
+    assert old_access_token == new_access_token
+  end
+
+  test "use of refresh token to get new access-token", %{conn: conn} do
+    {conn, client} = ClientTestHelper.init_valid_pkce_client(conn, :authorization_code_flow_pkce)
+
+    conn = ClientTestHelper.mock_pkce_token(conn, client.cache_pid)
+    old_refresh_token = Map.get(KindeClientSDK.get_all_data(conn), :refresh_token)
+    old_access_token = Map.get(KindeClientSDK.get_all_data(conn), :access_token)
+    :timer.sleep(70)
+
+    conn =
+      with_mock KindeClientSDK,
+        get_token: fn _ ->
+          ClientTestHelper.mock_result_for_refresh_token(conn, client.cache_pid)
+        end do
+        KindeClientSDK.get_token(conn)
+      end
+
+    new_refresh_token = Map.get(KindeClientSDK.get_all_data(conn), :refresh_token)
+    new_access_token = Map.get(KindeClientSDK.get_all_data(conn), :access_token)
+
+    assert old_refresh_token != new_refresh_token
+    assert old_access_token != new_access_token
   end
 end

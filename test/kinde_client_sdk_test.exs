@@ -5,7 +5,7 @@ defmodule KindeClientSDKTest do
   alias KindeClientSDK
   alias Plug.Conn
 
-  @domain Application.compile_env(:kinde_sdk, :domain)
+  @domain Application.compile_env(:kinde_sdk, :domain) |> String.replace("\"", "")
   @grant_type :client_credentials
 
   setup_all do
@@ -147,6 +147,17 @@ defmodule KindeClientSDKTest do
            }
   end
 
+  test "get user with picture_url", %{conn: conn} do
+    {conn, client} = ClientTestHelper.initialize_valid_client(conn, :authorization_code)
+
+    conn = ClientTestHelper.mock_picture_url(conn, client.cache_pid)
+
+    user_details = KindeClientSDK.get_user_detail(conn)
+
+    assert user_details.picture ==
+             "https://lh3.googleusercontent.com/a/AAcHTtfwb8yG8xi8Z33LUCXmnx-40nEyPV61NAlTrDsd=s96-c"
+  end
+
   test "get user for authenticated client_credentials grant", %{conn: conn} do
     {conn, client} = ClientTestHelper.initialize_valid_client(conn, @grant_type)
 
@@ -221,7 +232,7 @@ defmodule KindeClientSDKTest do
 
       assert KindeClientSDK.get_claim(conn, "iss") == %{
                name: "iss",
-               value: Application.get_env(:kinde_sdk, :domain)
+               value: Application.get_env(:kinde_sdk, :domain) |> String.replace("\"", "")
              }
     end
 
