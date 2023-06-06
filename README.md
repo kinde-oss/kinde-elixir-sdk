@@ -50,6 +50,41 @@ config :kinde_sdk, scope: "email"
 5. Once you're done with above steps, open the console and write `source .env` before any mix command.
 6. Note: This configuration is very important, you won't be able to compile the project, as well as no tests will run successfully until you follow these steps.
 
+## Configuration of kinde_sdk in Existing Project
+
+You need to follow these steps to setup the existing project properly:
+
+1. Create .env file at the root
+2. Add the following lines in there:
+```
+export KINDE_BACKEND_CLIENT_ID="6c43a124bc114dc0bf78889ae89349b3"
+export KINDE_FRONTEND_CLIENT_ID="2e41e9e798004177b1b44aa1e1ad3d62"
+export KINDE_CLIENT_SECRET="Tz9oKlQGW1VJX2FUoLdaeUHjCMnlNccHTW1fyOWlO4krBb4P1G"
+export KINDE_REDIRECT_URL="http://localhost:4000/callback"
+export KINDE_DOMAIN="https://elixirsdk2.kinde.com"
+export KINDE_LOGOUT_REDIRECT_URL="http://localhost:4000/logout"
+export KINDE_PKCE_LOGOUT_URL="http://localhost:4000/logout"
+export KINDE_PKCE_REDIRECT_URL="http://localhost:4000/pkce-callback"
+export KINDE_BASE_URL="https://app.kinde.com"
+```
+3. Don't forget to replace the values to your own application-keys, these are just dummy keys (might not work)
+4. Also make sure that your project has runtime.exs file in the config directory which has following piece of code written in it:
+```
+import Config
+import Envar
+Envar.load(".env")
+# configure kinde_sdk on runtime
+config :kinde_sdk,
+  backend_client_id: Envar.get("KINDE_BACKEND_CLIENT_ID"),
+  frontend_client_id: Envar.get("KINDE_FRONTEND_CLIENT_ID"),
+  client_secret: Envar.get("KINDE_CLIENT_SECRET"),
+  redirect_url: Envar.get("KINDE_REDIRECT_URL"),
+  domain: Envar.get("KINDE_DOMAIN"),
+  logout_redirect_url: Envar.get("KINDE_LOGOUT_REDIRECT_URL"),
+  pkce_logout_url: Envar.get("KINDE_PKCE_LOGOUT_URL"),
+  pkce_callback_url: Envar.get("KINDE_PKCE_REDIRECT_URL")
+```
+
 ## Usage
 
 Initialize your client like this:
