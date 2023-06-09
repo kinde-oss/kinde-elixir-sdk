@@ -354,57 +354,68 @@ defmodule KindeClientSDK do
   defp do_get_token(conn, grant_type)
        when grant_type in [:authorization_code, :authorization_code_flow_pkce] do
     client = get_kinde_client(conn)
-
-    new_grant_type = get_grant_type(client.grant_type)
+    expiring_timestamp = return_key(client.cache_pid, :kinde_expiring_time_stamp)
 
     form_params = %{
       client_id: client.client_id,
       client_secret: client.client_secret,
-      grant_type: new_grant_type,
+      grant_type: get_grant_type(client.grant_type),
       redirect_uri: client.redirect_uri,
       response_type: :code
     }
 
-    connection = Conn.fetch_query_params(conn)
-    params = connection.query_params
-    state = params["state"]
-    check_state_authentication(client.cache_pid, state)
+    if is_nil(expiring_timestamp) do
+      %{"state" => state, "code" => authorization_code} =
+        Conn.fetch_query_params(conn).query_params
 
-    error = params["error"]
+      check_state_authentication(client.cache_pid, state)
 
-    if !is_nil(error) do
-      error_description = params["error_description"]
-      message = if !is_nil(error_description), do: error_description, else: error
-      throw(message)
-    end
+      error = Conn.fetch_query_params(conn).query_params["error"]
 
-    authorization_code = params["code"]
-    if is_nil(authorization_code), do: throw("Not found code param")
-    form_params = Map.put(form_params, :code, authorization_code)
-
-    data = get_all_data(conn)
-    code_verifier = data.oauth_code_verifier
-
-    form_params =
-      if !is_nil(code_verifier) do
-        Map.put(form_params, :code_verifier, code_verifier)
-      else
-        if client.grant_type == :authorization_code_flow_pkce do
-          throw("Not found code_verifier")
-        else
-          form_params
-        end
+      if error do
+        error_description = Conn.fetch_query_params(conn).query_params["error_description"]
+        message = error_description || error
+        throw(message)
       end
 
-    form_params = Map.to_list(form_params)
+      if is_nil(authorization_code), do: throw("Not found code param")
+      form_params = Map.put(form_params, :code, authorization_code)
 
-    body = {:form, form_params}
-    {:ok, response} = HTTPoison.post(client.token_endpoint, body)
-    body = Jason.decode!(response.body)
+      code_verifier = get_all_data(conn).oauth_code_verifier
 
-    GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
+      form_params =
+        cond do
+          code_verifier ->
+            Map.put(form_params, :code_verifier, code_verifier)
 
-    save_data_to_session(client.cache_pid, body)
+          client.grant_type == :authorization_code_flow_pkce ->
+            throw("Not found code_verifier")
+
+          true ->
+            form_params
+        end
+
+      get_a_new_token(form_params, client)
+    else
+      case DateTime.compare(expiring_timestamp, DateTime.utc_now()) do
+        :gt ->
+          get_all_data(conn)
+
+        :lt ->
+          refresh_token_params =
+            form_params
+            |> Map.merge(%{
+              grant_type: :refresh_token,
+              refresh_token: return_key(client.cache_pid, :kinde_refresh_token)
+            })
+
+          get_a_new_token(refresh_token_params, client)
+
+        _ ->
+          "Access/Refresh Tokens are invalid"
+      end
+    end
+
     client = update_auth_status(client, :authenticated)
     save_kinde_client(conn, client)
 
@@ -415,12 +426,38 @@ defmodule KindeClientSDK do
     throw("Please provide correct grant_type")
   end
 
+  defp get_a_new_token(params, client) do
+    body = {:form, params |> Map.to_list()}
+
+    {:ok, response} =
+      HTTPoison.post(
+        client.token_endpoint,
+        body,
+        [
+          {"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}
+        ]
+      )
+
+    body = Jason.decode!(response.body)
+    GenServer.cast(client.cache_pid, {:add_kinde_data, {:kinde_token, body}})
+    save_data_to_session(client.cache_pid, body)
+  end
+
   defp save_data_to_session(pid, token) do
     expires_in = if is_nil(token["expires_in"]), do: 0, else: token["expires_in"]
 
     GenServer.cast(pid, {:add_kinde_data, {:kinde_login_time_stamp, DateTime.utc_now()}})
+
+    GenServer.cast(
+      pid,
+      {:add_kinde_data,
+       {:kinde_expiring_time_stamp,
+        Utils.calculate_expiring_timestamp(DateTime.utc_now(), expires_in)}}
+    )
+
     GenServer.cast(pid, {:add_kinde_data, {:kinde_access_token, token["access_token"]}})
     GenServer.cast(pid, {:add_kinde_data, {:kinde_id_token, token["id_token"]}})
+    GenServer.cast(pid, {:add_kinde_data, {:kinde_refresh_token, token["refresh_token"]}})
     GenServer.cast(pid, {:add_kinde_data, {:kinde_expires_in, expires_in}})
 
     payload = Utils.parse_jwt(token["id_token"])
@@ -430,10 +467,14 @@ defmodule KindeClientSDK do
         id: payload["sub"],
         given_name: payload["given_name"],
         family_name: payload["family_name"],
-        email: payload["email"]
+        email: payload["email"],
+        picture: payload["picture"]
       }
 
-      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, user}})
+      GenServer.cast(
+        pid,
+        {:add_kinde_data, {:kinde_user, user}}
+      )
     else
       GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
     end
@@ -561,7 +602,7 @@ defmodule KindeClientSDK do
   end
 
   @doc """
-  Returns a single claim from token and its value.
+  Returns a single claim object from token and its name and value.
 
   ### Usage
 
@@ -576,7 +617,11 @@ defmodule KindeClientSDK do
   @spec get_claim(Plug.Conn.t(), any, any) :: any
   def get_claim(conn, key, token_type \\ :access_token) do
     data = get_claims(conn, token_type)
-    data[key]
+
+    %{
+      name: key,
+      value: data[key]
+    }
   end
 
   @doc """
@@ -727,9 +772,11 @@ defmodule KindeClientSDK do
   """
   @spec get_all_data(Plug.Conn.t()) :: %{
           access_token: any,
+          refresh_token: any,
           expires_in: any,
           id_token: any,
           login_time_stamp: any,
+          expiring_time_stamp: any,
           token: any,
           user: any,
           oauth_code_verifier: any
@@ -739,13 +786,250 @@ defmodule KindeClientSDK do
 
     %{
       login_time_stamp: return_key(pid, :kinde_login_time_stamp),
+      expiring_time_stamp: return_key(pid, :kinde_expiring_time_stamp),
       access_token: return_key(pid, :kinde_access_token),
+      refresh_token: return_key(pid, :kinde_refresh_token),
       id_token: return_key(pid, :kinde_id_token),
       expires_in: return_key(pid, :kinde_expires_in),
       token: return_key(pid, :kinde_token),
       user: return_key(pid, :kinde_user),
       oauth_code_verifier: return_key(pid, :kinde_oauth_code_verifier)
     }
+  end
+
+  @doc """
+    Returns more readible version of any feature-flag
+
+    ### Returns
+
+          feature-flag map such as
+
+          %{
+            "code" => "theme",
+            "is_default" => false,
+            "type" => "string",
+            "value" => "grayscale"
+          }
+
+    ### Usage
+
+          KindeClientSDK.get_flag(conn, "theme")
+          KindeClientSDK.get_flag(conn, "theme", "black")
+          KindeClientSDK.get_flag(conn, "theme", "black", "s")
+  """
+  @spec get_flag(Plug.Conn.t(), String.t()) :: map() | String.t()
+  def get_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      nil ->
+        "This flag does not exist, and no default value provided"
+
+      %{"t" => flag_type, "v" => value} ->
+        %{
+          "code" => code,
+          "type" => get_type(flag_type),
+          "value" => value,
+          "is_default" => false
+        }
+    end
+  end
+
+  @spec get_flag(Plug.Conn.t(), String.t(), any()) :: map() | String.t()
+  def get_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      nil ->
+        %{
+          "code" => code,
+          "value" => default_value,
+          "is_default" => true
+        }
+
+      _ ->
+        get_flag(conn, code)
+    end
+  end
+
+  @spec get_flag(Plug.Conn.t(), String.t(), any(), String.t()) :: map() | String.t()
+  def get_flag(conn, code, default_value, flag_type) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      %{"t" => actual_type} when actual_type != flag_type ->
+        "The flag type was provided as #{get_type(flag_type)}, but it is #{get_type(actual_type)}"
+
+      _ ->
+        get_flag(conn, code, default_value)
+    end
+  end
+
+  @doc """
+    Returns a boolean flag from feature-flags object
+
+    ### Returns
+
+          true, false or error-messages
+
+    ### Usage
+
+          KindeClientSDK.get_boolean_flag(conn, "is_dark_mode")
+          KindeClientSDK.get_boolean_flag(conn, "is_dark_mode", false)
+  """
+  @spec get_boolean_flag(Plug.Conn.t(), String.t()) :: boolean() | String.t()
+  def get_boolean_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      %{"t" => "b", "v" => value} ->
+        value
+
+      %{"t" => type} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not boolean"
+
+      _ ->
+        "Error - flag does not exist and no default provided"
+    end
+  end
+
+  @spec get_boolean_flag(Plug.Conn.t(), String.t(), boolean()) :: boolean() | String.t()
+  def get_boolean_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      nil ->
+        default_value
+
+      %{"t" => "b", "v" => value} ->
+        value
+
+      %{"t" => type, "v" => _} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not boolean"
+    end
+  end
+
+  @doc """
+    Returns a string flag from feature-flags object
+
+    ### Returns
+
+          corresponding values from object or error-messages
+
+    ### Usage
+
+          KindeClientSDK.get_string_flag(conn, "theme")
+          KindeClientSDK.get_string_flag(conn, "theme", "black")
+  """
+  @spec get_string_flag(Plug.Conn.t(), String.t()) :: String.t()
+  def get_string_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      %{"t" => "s", "v" => value} ->
+        value
+
+      %{"t" => type} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not string"
+
+      _ ->
+        "Error - flag does not exist and no default provided"
+    end
+  end
+
+  @spec get_string_flag(Plug.Conn.t(), String.t(), String.t()) :: String.t()
+  def get_string_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      nil ->
+        default_value
+
+      %{"t" => "s", "v" => value} ->
+        value
+
+      %{"t" => type, "v" => _} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not string"
+    end
+  end
+
+  @doc """
+    Returns a integer flag from feature-flags object
+
+    ### Returns
+
+          corresponding values from object or error-messages
+
+    ### Usage
+
+          KindeClientSDK.get_integer_flag(conn, "counter")
+          KindeClientSDK.get_integer_flag(conn, "counter", 46)
+  """
+
+  @spec get_integer_flag(Plug.Conn.t(), String.t()) :: integer() | String.t()
+  def get_integer_flag(conn, code) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      %{"t" => "i", "v" => value} ->
+        value
+
+      %{"t" => type} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not integer"
+
+      _ ->
+        "Error - flag does not exist and no default provided"
+    end
+  end
+
+  @spec get_integer_flag(Plug.Conn.t(), String.t(), integer()) :: integer() | String.t()
+  def get_integer_flag(conn, code, default_value) do
+    %{name: _claim_name, value: feature_flags} = KindeClientSDK.get_claim(conn, "feature_flags")
+
+    case feature_flags[code] do
+      nil ->
+        default_value
+
+      %{"t" => "i", "v" => value} ->
+        value
+
+      %{"t" => type, "v" => _} ->
+        "Error - Flag #{code} is of type #{get_type(type)} not integer"
+    end
+  end
+
+  defp get_type(flag) when is_map(flag) do
+    type = flag["t"]
+
+    case type do
+      "i" ->
+        "integer"
+
+      "s" ->
+        "string"
+
+      "b" ->
+        "boolean"
+
+      _ ->
+        "undefined"
+    end
+  end
+
+  defp get_type(flag) do
+    case flag do
+      "i" ->
+        "integer"
+
+      "s" ->
+        "string"
+
+      "b" ->
+        "boolean"
+
+      _ ->
+        "undefined"
+    end
   end
 
   defp return_key(pid, key) do

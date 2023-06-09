@@ -5,7 +5,7 @@ defmodule AuthorizationCodeTest do
   alias KindeClientSDK
   alias Plug.Conn
 
-  @domain Application.get_env(:kinde_sdk, :domain)
+  @domain Application.compile_env(:kinde_sdk, :domain) |> String.replace("\"", "")
   @grant_type :authorization_code
 
   setup_all do

@@ -30,7 +30,11 @@ defmodule KindeSDK.SDK.ClientCredentials do
       |> Map.to_list()
 
     body = {:form, params}
-    {:ok, response} = HTTPoison.post(client.token_endpoint, body)
+
+    {:ok, response} =
+      HTTPoison.post(client.token_endpoint, body, [
+        {"Kinde-SDK", "Elixir/#{Utils.get_current_app_version()}"}
+      ])
 
     contents = Jason.decode!(response.body)
 

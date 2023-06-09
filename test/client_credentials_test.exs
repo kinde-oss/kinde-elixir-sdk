@@ -4,7 +4,7 @@ defmodule ClientCredentialsTest do
   alias ClientTestHelper
   alias KindeClientSDK
 
-  @domain Application.get_env(:kinde_sdk, :domain)
+  @domain Application.compile_env(:kinde_sdk, :domain) |> String.replace("\"", "")
   @grant_type :client_credentials
 
   setup_all do

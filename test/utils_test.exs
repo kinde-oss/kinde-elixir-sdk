@@ -25,4 +25,8 @@ defmodule UtilsTest do
     url = "test.c"
     refute Utils.validate_url(url)
   end
+
+  test "get_current_app_version/0 action returns the current-app-version" do
+    assert Utils.get_current_app_version() == "1.2.0"
+  end
 end

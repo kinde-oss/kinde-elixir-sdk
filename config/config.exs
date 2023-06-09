@@ -7,8 +7,6 @@
 # General application configuration
 import Config
 
-config :kinde_sdk, base_url: "https://app.kinde.com"
-
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 #
