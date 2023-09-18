@@ -2,6 +2,8 @@
 
 The Kinde Elixir SDK allows developers to use this library for the Kinde Business.
 
+You can also use the [Elixir starter kit here](https://github.com/kinde-starter-kits/elixir-starter-kit).
+
 ## Register for Kinde
 
 If you haven’t already got a Kinde account, [register for free here](http://app.kinde.com/register) (no credit card required).
