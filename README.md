@@ -2,7 +2,7 @@
 
 The Kinde SDK for Elixir.
 
-You can also use the Elixir starter kit here https://github.com/kinde-starter-kits/elixir-starter-kit.
+You can also use the Elixir starter kit [here](https://github.com/kinde-starter-kits/elixir-starter-kit).
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com) [![Kinde Docs](https://img.shields.io/badge/Kinde-Docs-eee?style=flat-square)](https://kinde.com/docs/developer-tools) [![Kinde Community](https://img.shields.io/badge/Kinde-Community-eee?style=flat-square)](https://thekindecommunity.slack.com)
 
