@@ -1,4 +1,18 @@
 defmodule KindeSDK.SDK.ClientCredentials do
+  @moduledoc """
+  Client Credentials OAuth2 Flow
+
+  This module provides functions for implementing the Client Credentials OAuth2 flow in the Kinde SDK. The Client Credentials flow is typically used for server-to-server communication, allowing a Kinde application to obtain access tokens and access secured resources.
+
+  ## Usage Example
+
+  To acquire an access token using the Client Credentials flow, you can call the `login/3` function as follows:
+
+  ```elixir
+  token = KindeSDK.SDK.ClientCredentials.login(client, additional_params)
+
+  This module simplifies the process of obtaining an access token for server-side authentication in Kinde applications.
+  """
   alias KindeSDK.SDK.Utils
   use Tesla
   alias HTTPoison
