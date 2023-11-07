@@ -1,4 +1,22 @@
 defmodule KindeSDK.KindeCache do
+  @moduledoc """
+  Kinde Cache GenServer
+
+  This module defines a GenServer for caching data in the Kinde SDK.
+  It provides methods to store and retrieve data from an ETS table for efficient data access.
+
+  ## Usage Example
+
+  To use the Kinde Cache GenServer, you can start it and then interact with it as follows:
+
+  ```elixir
+  {:ok, pid} = KindeSDK.KindeCache.start_link()
+  KindeSDK.KindeCache.add_kinde_data(pid, {:some_key, "cached_data"})
+  data = KindeSDK.KindeCache.get_kinde_data(pid, :some_key)
+
+  This GenServer is designed to help improve the performance of data storage
+  and retrieval in Kinde applications.
+  """
   use GenServer
 
   def start_link() do
