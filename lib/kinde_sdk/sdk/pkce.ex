@@ -1,6 +1,23 @@
 defmodule KindeSDK.SDK.Pkce do
   alias KindeSDK.SDK.Utils
 
+  @moduledoc """
+  PKCE (Proof Key for Code Exchange) OAuth2 Login Flow
+
+  This module provides functions for implementing the PKCE OAuth2 login flow
+  in the Kinde SDK. PKCE is a security extension for OAuth2 to protect against
+  code interception and misuse. This module facilitates the login process and the
+  generation of PKCE code challenges.
+
+  ## Usage Example
+
+  To initiate a PKCE OAuth2 login flow, you can call the `login/4` function as follows:
+
+  ```elixir
+  conn = KindeSDK.SDK.Pkce.login(conn, client, start_page, additional_params)
+
+  This module is designed to simplify the login process while enhancing security in Kinde applications.
+  """
   @spec login(
           Plug.Conn.t(),
           %{
