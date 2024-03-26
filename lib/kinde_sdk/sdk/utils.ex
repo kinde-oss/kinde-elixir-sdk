@@ -80,9 +80,11 @@ defmodule KindeSDK.SDK.Utils do
 
   @spec get_current_app_version :: binary
   def get_current_app_version() do
+   # Using Application.spec(:vsn) to fetch the application version, suitable for production environments.
     :kinde_sdk
     |> Application.spec(:vsn)
     |> to_string()
+  end
   end
 
   def calculate_expiring_timestamp(login_timestamp, expiring_in) do
