@@ -42,7 +42,8 @@ defmodule KindeSDK.Mixfile do
       {:jason, "~> 1.3"},
       {:httpoison, "~> 0.7"},
       {:envar, "~> 1.1.0"},
-      {:mock, "~> 0.3.0", only: :test}
+      {:mock, "~> 0.3.0", only: :test},
+      {:ssl_verify_fun, "~> 1.1.7"}
     ]
   end
 

@@ -80,9 +80,9 @@ defmodule KindeSDK.SDK.Utils do
 
   @spec get_current_app_version :: binary
   def get_current_app_version() do
-    Mix.Project.config()[:version]
-    |> String.replace("~>", "")
-    |> String.trim_leading()
+    :kinde_sdk
+    |> Application.spec(:vsn)
+    |> to_string()
   end
 
   def calculate_expiring_timestamp(login_timestamp, expiring_in) do
