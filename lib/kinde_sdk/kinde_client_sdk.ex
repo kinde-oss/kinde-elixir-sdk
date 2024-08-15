@@ -98,6 +98,22 @@ defmodule KindeClientSDK do
     :scopes
   ]
 
+  @type t :: %KindeClientSDK{
+          additional_params: map,
+          auth_status: atom,
+          authorization_endpoint: binary,
+          cache_pid: pid,
+          client_id: any,
+          client_secret: any,
+          domain: binary,
+          grant_type: any,
+          logout_endpoint: binary,
+          logout_redirect_uri: any,
+          redirect_uri: binary,
+          scopes: any,
+          token_endpoint: binary
+        }
+
   @doc """
   Used for initializing the Kinde client which will be then used other implemented client functions,
   like `login` and `get_token`.
@@ -186,7 +202,7 @@ defmodule KindeClientSDK do
   """
   @spec login(
           Plug.Conn.t(),
-          map(),
+          KindeClientSDK.t(),
           map()
         ) :: any
   def login(conn, client, additional_params \\ %{}) do
@@ -221,7 +237,7 @@ defmodule KindeClientSDK do
   """
   @spec register(
           Plug.Conn.t(),
-          map(),
+          KindeClientSDK.t(),
           map()
         ) :: Plug.Conn.t()
   def register(conn, client, additional_params \\ %{}) do
@@ -243,7 +259,7 @@ defmodule KindeClientSDK do
   """
   @spec create_org(
           Plug.Conn.t(),
-          map(),
+          KindeClientSDK.t(),
           map()
         ) :: Plug.Conn.t()
   def create_org(conn, client, additional_params \\ %{}) do
