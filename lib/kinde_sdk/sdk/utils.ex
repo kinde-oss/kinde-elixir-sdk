@@ -85,7 +85,6 @@ defmodule KindeSDK.SDK.Utils do
     |> Application.spec(:vsn)
     |> to_string()
   end
-  end
 
   def calculate_expiring_timestamp(login_timestamp, expiring_in) do
     {:ok, expiring_at} =
