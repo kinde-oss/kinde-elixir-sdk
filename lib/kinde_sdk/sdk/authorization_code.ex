@@ -1,4 +1,18 @@
 defmodule KindeSDK.SDK.AuthorizationCode do
+  @moduledoc """
+  Authorization Code OAuth2 Flow
+
+  This module provides functions for implementing the Authorization Code OAuth2 flow in the Kinde SDK. The Authorization Code flow is commonly used for user authentication, allowing a Kinde application to obtain an access token after the user authorizes the application.
+
+  ## Usage Example
+
+  To initiate an Authorization Code OAuth2 flow, you can call the `login/3` function as follows:
+
+  ```elixir
+  conn = KindeSDK.SDK.AuthorizationCode.login(conn, client, additional_params)
+
+  This module simplifies the process of initiating the Authorization Code flow for user authentication in Kinde applications.
+  """
   alias KindeSDK.SDK.Utils
 
   @spec login(

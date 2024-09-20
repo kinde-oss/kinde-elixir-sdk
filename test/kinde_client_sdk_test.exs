@@ -62,7 +62,7 @@ defmodule KindeClientSDKTest do
 
   test "invalid audience", %{conn: conn} do
     additional_params = %{
-      audience: 12345
+      audience: 12_345
     }
 
     assert catch_throw(
@@ -82,7 +82,7 @@ defmodule KindeClientSDKTest do
 
   test "login invalid org code", %{conn: conn} do
     additional_params = %{
-      org_code: 12345,
+      org_code: 12_345,
       org_name: "Test App"
     }
 

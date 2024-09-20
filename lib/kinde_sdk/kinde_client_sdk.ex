@@ -69,9 +69,9 @@ defmodule KindeClientSDK do
   alias Plug.Conn
   use Tesla
 
-  @authorizationEndPoint "/oauth2/auth"
-  @tokenEndPoint "/oauth2/token"
-  @logoutEndPoint "/logout"
+  @authorization_end_point "/oauth2/auth"
+  @token_end_point "/oauth2/token"
+  @logout_end_point "/logout"
 
   @enforce_keys [
     :cache_pid,
@@ -97,6 +97,22 @@ defmodule KindeClientSDK do
     :additional_params,
     :scopes
   ]
+
+  @type t :: %KindeClientSDK{
+          additional_params: map,
+          auth_status: atom,
+          authorization_endpoint: binary,
+          cache_pid: pid,
+          client_id: any,
+          client_secret: any,
+          domain: binary,
+          grant_type: any,
+          logout_endpoint: binary,
+          logout_redirect_uri: any,
+          redirect_uri: binary,
+          scopes: any,
+          token_endpoint: binary
+        }
 
   @doc """
   Used for initializing the Kinde client which will be then used other implemented client functions,
@@ -125,22 +141,7 @@ defmodule KindeClientSDK do
   Throws for invalid `domain`, `redirect_uri` and `additional_params`.
   """
   @spec init(Plug.Conn.t(), binary, binary, any, any, any, any, binary, map) ::
-          {Plug.Conn.t(),
-           %KindeClientSDK{
-             additional_params: map,
-             auth_status: :unauthenticated,
-             authorization_endpoint: <<_::64, _::_*8>>,
-             cache_pid: pid,
-             client_id: any,
-             client_secret: any,
-             domain: binary,
-             grant_type: any,
-             logout_endpoint: <<_::56, _::_*8>>,
-             logout_redirect_uri: any,
-             redirect_uri: binary,
-             scopes: any,
-             token_endpoint: <<_::64, _::_*8>>
-           }}
+          {Plug.Conn.t(), map()}
   def init(
         conn,
         domain,
@@ -173,9 +174,9 @@ defmodule KindeClientSDK do
       additional_params: Utils.check_additional_params(additional_params),
       logout_redirect_uri: logout_redirect_uri,
       scopes: scopes,
-      authorization_endpoint: "#{domain}#{@authorizationEndPoint}",
-      token_endpoint: "#{domain}#{@tokenEndPoint}",
-      logout_endpoint: "#{domain}#{@logoutEndPoint}",
+      authorization_endpoint: "#{domain}#{@authorization_end_point}",
+      token_endpoint: "#{domain}#{@token_end_point}",
+      logout_endpoint: "#{domain}#{@logout_end_point}",
       auth_status: :unauthenticated
     }
 
@@ -201,22 +202,8 @@ defmodule KindeClientSDK do
   """
   @spec login(
           Plug.Conn.t(),
-          %KindeClientSDK{
-            additional_params: map,
-            auth_status: atom,
-            authorization_endpoint: <<_::64, _::_*8>>,
-            cache_pid: pid,
-            client_id: any,
-            client_secret: any,
-            domain: binary,
-            grant_type: any,
-            logout_endpoint: <<_::56, _::_*8>>,
-            logout_redirect_uri: any,
-            redirect_uri: binary,
-            scopes: any,
-            token_endpoint: <<_::64, _::_*8>>
-          },
-          map
+          KindeClientSDK.t(),
+          map()
         ) :: any
   def login(conn, client, additional_params \\ %{}) do
     clean_session(client.cache_pid)
@@ -250,22 +237,8 @@ defmodule KindeClientSDK do
   """
   @spec register(
           Plug.Conn.t(),
-          %KindeClientSDK{
-            additional_params: map,
-            auth_status: atom,
-            authorization_endpoint: <<_::64, _::_*8>>,
-            cache_pid: pid,
-            client_id: any,
-            client_secret: any,
-            domain: binary,
-            grant_type: any,
-            logout_endpoint: <<_::56, _::_*8>>,
-            logout_redirect_uri: any,
-            redirect_uri: binary,
-            scopes: any,
-            token_endpoint: <<_::64, _::_*8>>
-          },
-          map
+          KindeClientSDK.t(),
+          map()
         ) :: Plug.Conn.t()
   def register(conn, client, additional_params \\ %{}) do
     client = update_auth_status(client, :authenticating)
@@ -286,22 +259,8 @@ defmodule KindeClientSDK do
   """
   @spec create_org(
           Plug.Conn.t(),
-          %KindeClientSDK{
-            additional_params: map,
-            auth_status: atom,
-            authorization_endpoint: <<_::64, _::_*8>>,
-            cache_pid: pid,
-            client_id: any,
-            client_secret: any,
-            domain: binary,
-            grant_type: any,
-            logout_endpoint: <<_::56, _::_*8>>,
-            logout_redirect_uri: any,
-            redirect_uri: binary,
-            scopes: any,
-            token_endpoint: <<_::64, _::_*8>>
-          },
-          map
+          KindeClientSDK.t(),
+          map()
         ) :: Plug.Conn.t()
   def create_org(conn, client, additional_params \\ %{}) do
     additional_params = Map.put(additional_params, :is_create_org, "true")
@@ -321,22 +280,7 @@ defmodule KindeClientSDK do
         GenServer.call(pid, {:get_kinde_data, :kinde_access_token})
   """
   @spec get_token(Plug.Conn.t()) ::
-          {Plug.Conn.t(),
-           %KindeClientSDK{
-             additional_params: map,
-             auth_status: atom,
-             authorization_endpoint: <<_::64, _::_*8>>,
-             cache_pid: pid,
-             client_id: any,
-             client_secret: any,
-             domain: binary,
-             grant_type: any,
-             logout_endpoint: <<_::56, _::_*8>>,
-             logout_redirect_uri: any,
-             redirect_uri: binary,
-             scopes: any,
-             token_endpoint: <<_::64, _::_*8>>
-           }}
+          {Plug.Conn.t(), map()}
   def get_token(conn) do
     client = get_kinde_client(conn)
     do_get_token(conn, client.grant_type)
@@ -397,23 +341,7 @@ defmodule KindeClientSDK do
 
       get_a_new_token(form_params, client)
     else
-      case DateTime.compare(expiring_timestamp, DateTime.utc_now()) do
-        :gt ->
-          get_all_data(conn)
-
-        :lt ->
-          refresh_token_params =
-            form_params
-            |> Map.merge(%{
-              grant_type: :refresh_token,
-              refresh_token: return_key(client.cache_pid, :kinde_refresh_token)
-            })
-
-          get_a_new_token(refresh_token_params, client)
-
-        _ ->
-          "Access/Refresh Tokens are invalid"
-      end
+      fetch_token_with_expiring_timestamps(conn, expiring_timestamp, form_params, client)
     end
 
     client = update_auth_status(client, :authenticated)
@@ -424,6 +352,26 @@ defmodule KindeClientSDK do
 
   defp do_get_token(_, _) do
     throw("Please provide correct grant_type")
+  end
+
+  defp fetch_token_with_expiring_timestamps(conn, expiring_timestamp, form_params, client) do
+    case DateTime.compare(expiring_timestamp, DateTime.utc_now()) do
+      :gt ->
+        get_all_data(conn)
+
+      :lt ->
+        refresh_token_params =
+          form_params
+          |> Map.merge(%{
+            grant_type: :refresh_token,
+            refresh_token: return_key(client.cache_pid, :kinde_refresh_token)
+          })
+
+        get_a_new_token(refresh_token_params, client)
+
+      _ ->
+        "Access/Refresh Tokens are invalid"
+    end
   end
 
   defp get_a_new_token(params, client) do
@@ -462,7 +410,9 @@ defmodule KindeClientSDK do
 
     payload = Utils.parse_jwt(token["id_token"])
 
-    if !is_nil(payload) do
+    if is_nil(payload) do
+      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
+    else
       user = %{
         id: payload["sub"],
         given_name: payload["given_name"],
@@ -475,8 +425,6 @@ defmodule KindeClientSDK do
         pid,
         {:add_kinde_data, {:kinde_user, user}}
       )
-    else
-      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
     end
   end
 
@@ -717,21 +665,7 @@ defmodule KindeClientSDK do
   ### Usage
         client = KindeClientSDK.get_kinde_client(conn)
   """
-  @spec get_kinde_client(Plug.Conn.t()) :: %KindeClientSDK{
-          additional_params: map,
-          auth_status: atom,
-          authorization_endpoint: <<_::64, _::_*8>>,
-          cache_pid: pid,
-          client_id: any,
-          client_secret: any,
-          domain: binary,
-          grant_type: any,
-          logout_endpoint: <<_::56, _::_*8>>,
-          logout_redirect_uri: any,
-          redirect_uri: binary,
-          scopes: any,
-          token_endpoint: <<_::64, _::_*8>>
-        }
+  @spec get_kinde_client(Plug.Conn.t()) :: map()
   def get_kinde_client(conn) do
     [kinde_client: client] =
       Conn.get_session(conn, :kinde_cache_pid)

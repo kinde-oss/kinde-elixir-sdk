@@ -81,7 +81,7 @@ defmodule ClientTestHelper do
       "id_token" =>
         "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJLaW5kZSBFbGl4aXIgVGVzdCIsImlhdCI6MTY4MDYwODY3NSwiZXhwIjoxNzEyMTQ0Njc1LCJhdWQiOiJ3d3cuZXhhbXBsZS5jb20iLCJzdWIiOiJ0ZXN0QGtpbmRlLmNvbSIsImdpdmVuX25hbWUiOiJKb2huIiwiZmFtaWx5X25hbWUiOiJEb2UiLCJlbWFpbCI6InVzZXJAa2luZGUuY29tIiwib3JnX2NvZGUiOiI3NjU1NDYifQ.7oLWhK6MhMdOWhExd7XTKUH-FvcfUBtBZQjvyKWmSyE",
       "access_token" => nil,
-      "expires_in" => 99987
+      "expires_in" => 99_987
     }
 
     expires_in = if is_nil(token["expires_in"]), do: 0, else: token["expires_in"]
@@ -93,7 +93,9 @@ defmodule ClientTestHelper do
 
     payload = Utils.parse_jwt(token["id_token"])
 
-    if !is_nil(payload) do
+    if is_nil(payload) do
+      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
+    else
       user = %{
         id: payload["sub"],
         given_name: payload["given_name"],
@@ -102,8 +104,6 @@ defmodule ClientTestHelper do
       }
 
       GenServer.cast(pid, {:add_kinde_data, {:kinde_user, user}})
-    else
-      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
     end
 
     conn
@@ -128,7 +128,9 @@ defmodule ClientTestHelper do
 
     payload = Utils.parse_jwt(token["id_token"])
 
-    if !is_nil(payload) do
+    if is_nil(payload) do
+      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
+    else
       user = %{
         id: payload["sub"],
         given_name: payload["given_name"],
@@ -138,8 +140,6 @@ defmodule ClientTestHelper do
       }
 
       GenServer.cast(pid, {:add_kinde_data, {:kinde_user, user}})
-    else
-      GenServer.cast(pid, {:add_kinde_data, {:kinde_user, nil}})
     end
 
     conn
