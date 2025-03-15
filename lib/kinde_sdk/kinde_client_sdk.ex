@@ -161,7 +161,7 @@ defmodule KindeClientSDK do
       throw("Please provide valid redirect_uri")
     end
 
-    {:ok, pid} = KindeCache.start_link()
+    {:ok, pid} = KindeCache.start()
     conn = Conn.put_session(conn, :kinde_cache_pid, pid)
 
     client = %__MODULE__{
