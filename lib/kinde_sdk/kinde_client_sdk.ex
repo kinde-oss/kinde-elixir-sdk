@@ -932,6 +932,46 @@ defmodule KindeClientSDK do
     end
   end
 
+
+  @doc """
+  Initializes the connection with access and refresh tokens.
+
+  ## Parameters
+  - `conn`: The connection to assign the tokens to.
+  - `access_token`: The access token to be stored.
+  - `refresh_token`: The refresh token to be stored.
+
+  ## Returns
+  - The updated connection with assigned tokens.
+  """
+  def init_with_tokens(conn, access_token, refresh_token) do
+    if is_nil(access_token) or is_nil(refresh_token) do
+      raise ArgumentError, "Tokens cannot be nil"
+    end
+
+    client = %{
+      access_token: access_token,
+      refresh_token: refresh_token
+    }
+
+    Conn.assign(conn, :kinde_client, client)
+  end
+
+  def get_kinde_client(conn) do
+    conn.assigns[:kinde_client]
+  end
+
+  def authenticated_request(conn) do
+    client = get_kinde_client(conn)
+
+    if is_nil(client) or is_nil(client.access_token) do
+      raise "Kinde Client or access token is missing"
+    end
+
+    access_token = client.access_token
+    headers = [{"Authorization", "Bearer #{access_token}"}]
+  end
+
   defp get_type(flag) when is_map(flag) do
     type = flag["t"]
 
