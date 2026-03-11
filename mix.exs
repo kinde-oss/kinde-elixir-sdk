@@ -4,13 +4,13 @@ defmodule KindeSDK.Mixfile do
   def project do
     [
       app: :kinde_sdk,
-      version: "1.2.0",
+      version: "1.2.1",
       elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
       aliases: aliases(),
-      description: "Provides endpoints to manage your Kinde Businesses",
+      description: "DEPRECATED - Kinde Elixir SDK. See GitHub repo for migration options.",
       deps: deps()
     ]
   end
@@ -54,7 +54,10 @@ defmodule KindeSDK.Mixfile do
       name: "kinde_sdk",
       files: ~w(config lib test .formatter.exs .gitignore LICENSE* mix.exs README*),
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/kinde-oss/kinde-elixir-sdk"}
+      links: %{
+        "GitHub" => "https://github.com/kinde-oss/kinde-elixir-sdk",
+        "Kinde API Reference" => "https://kinde.com/api/docs/"
+      }
     ]
   end
 
