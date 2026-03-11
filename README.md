@@ -6,7 +6,7 @@
 >
 > **Support Ended:** December 31, 2025
 
-Due to low adoption and usage, we made the decision to deprecate the Kinde Elixir SDK. This allows us to focus our resources on SDKs with higher demand and better serve the broader Kinde community.
+Due to low adoption and usage, we decided to deprecate the Kinde Elixir SDK. This allows us to focus our resources on SDKs with higher demand and better serve the broader Kinde community.
 
 ## What This Means
 
@@ -22,7 +22,7 @@ Due to low adoption and usage, we made the decision to deprecate the Kinde Elixi
 The Kinde Elixir SDK was a wrapper around our API. You can integrate directly with the [Kinde API](https://kinde.com/api/docs/) using any HTTP client library in Elixir (such as `HTTPoison`, `Req`, or `Finch`).
 
 - [Kinde API Reference](https://kinde.com/api/docs/)
-- [Kinde Authentication Overview](https://docs.kinde.com/developer-tools/about/our-apis/)
+- [Using Kinde without an SDK](https://docs.kinde.com/developer-tools/about/using-kinde-without-an-sdk/)
 
 ### Option 2: Community-Maintained Alternatives
 
@@ -34,10 +34,10 @@ If your architecture allows, consider using one of our actively maintained SDKs:
 
 - [Node.js SDK](https://github.com/kinde-oss/kinde-nodejs-sdk)
 - [Python SDK](https://github.com/kinde-oss/kinde-python-sdk)
-- [Go SDK](https://github.com/kinde-oss/kinde-go-sdk)
+- [Go SDK](https://github.com/kinde-oss/kinde-go)
 - [PHP SDK](https://github.com/kinde-oss/kinde-php-sdk)
 
-[View all Kinde SDKs](https://docs.kinde.com/developer-tools/sdks/official-sdks/)
+[View all Kinde SDKs](https://docs.kinde.com/developer-tools/about/our-sdks/)
 
 ## For Existing Users
 
