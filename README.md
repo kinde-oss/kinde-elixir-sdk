@@ -1,6 +1,6 @@
 # DEPRECATED - Kinde Elixir SDK
 
-> **⚠️ This SDK is deprecated and this repository has been archived.**
+> **⚠️ This SDK is deprecated and this repository will be archived.**
 >
 > **Effective Date:** November 17, 2025
 >
@@ -12,8 +12,8 @@ Due to low adoption and usage, we made the decision to deprecate the Kinde Elixi
 
 - **No new features** will be added to this SDK
 - **No bug fixes** will be provided
-- **No support** is available for this SDK
-- The repository is now in **read-only mode**
+- **No SDK-specific support or maintenance** will be provided
+- The repository will be set to **read-only mode**
 
 ## Migration Options
 
@@ -46,10 +46,10 @@ If you're currently using this SDK in production:
 - The SDK will continue to function as-is, but we recommend migrating to direct API integration
 - Test thoroughly in a development environment before switching in production
 
-## Need Help?
+## Need Help Migrating?
 
 - **Join our community:** [Kinde Slack Community](https://kinde.com/community/)
-- **Contact support:** [support@kinde.com](mailto:support@kinde.com)
+- **General Kinde support:** [support@kinde.com](mailto:support@kinde.com)
 - **Documentation:** [docs.kinde.com](https://docs.kinde.com/)
 
 ---
