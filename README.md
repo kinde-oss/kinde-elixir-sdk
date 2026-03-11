@@ -1,6 +1,6 @@
 # DEPRECATED - Kinde Elixir SDK
 
-> **⚠️ This SDK is deprecated and this repository will be archived.**
+> **⚠️ This SDK is deprecated and this repository has been archived.**
 >
 > **Effective Date:** November 17, 2025
 >
@@ -13,7 +13,7 @@ Due to low adoption and usage, we decided to deprecate the Kinde Elixir SDK. Thi
 - **No new features** will be added to this SDK
 - **No bug fixes** will be provided
 - **No SDK-specific support or maintenance** will be provided
-- The repository will be set to **read-only mode**
+- The repository is in **read-only mode**
 
 ## Migration Options
 
