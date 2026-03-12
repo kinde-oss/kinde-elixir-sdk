@@ -1,42 +1,63 @@
-# Kinde Elixir
+# DEPRECATED - Kinde Elixir SDK
 
-The Kinde SDK for Elixir.
+> **⚠️ This SDK is deprecated and this repository has been archived.**
+>
+> **Effective Date:** November 17, 2025
+>
+> **Support Ended:** December 31, 2025
 
-You can also use the Elixir starter kit [here](https://github.com/kinde-starter-kits/elixir-starter-kit).
+Due to low adoption and usage, we decided to deprecate the Kinde Elixir SDK. This allows us to focus our resources on SDKs with higher demand and better serve the broader Kinde community.
 
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](https://makeapullrequest.com) [![Kinde Docs](https://img.shields.io/badge/Kinde-Docs-eee?style=flat-square)](https://kinde.com/docs/developer-tools) [![Kinde Community](https://img.shields.io/badge/Kinde-Community-eee?style=flat-square)](https://thekindecommunity.slack.com)
+## What This Means
 
-### Initial set up
+- **No new features** will be added to this SDK
+- **No bug fixes** will be provided
+- **No SDK-specific support or maintenance** will be provided
+- The repository is in **read-only mode**
 
-1. Clone the repository to your machine:
+## Migration Options
 
-   ```bash
-   git clone https://github.com/kinde-oss/kinde-elixir-sdk.git
-   ```
+### Option 1: Use Kinde's API Directly
 
-2. Go into the project:
+The Kinde Elixir SDK was a wrapper around our API. You can integrate directly with the [Kinde API](https://kinde.com/api/docs/) using any HTTP client library in Elixir (such as `HTTPoison`, `Req`, or `Finch`).
 
-   ```bash
-   cd kinde-elixir-sdk
-   ```
+- [Kinde API Reference](https://kinde.com/api/docs/)
+- [Using Kinde without an SDK](https://docs.kinde.com/developer-tools/about/using-kinde-without-an-sdk/)
 
-3. Install the dependencies:
+### Option 2: Community-Maintained Alternatives
 
-   ```bash
-   mix deps.get
-   ```
-   
-## Documentation
+If a community member creates an alternative Elixir SDK, we'll link to it here. Check our [developer community](https://kinde.com/community/) for updates.
 
-For details on integrating this SDK into your project, head over to the [Kinde docs](https://kinde.com/docs/) and see the [Elixir SDK](https://kinde.com/docs/developer-tools/elixir-sdk/) doc 👍🏼.
+### Option 3: Use Another Language SDK
 
-## Publishing
+If your architecture allows, consider using one of our actively maintained SDKs:
 
-The core team handles publishing.
-## Contributing
+- [Node.js SDK](https://github.com/kinde-oss/kinde-nodejs-sdk)
+- [Python SDK](https://github.com/kinde-oss/kinde-python-sdk)
+- [Go SDK](https://github.com/kinde-oss/kinde-go)
+- [PHP SDK](https://github.com/kinde-oss/kinde-php-sdk)
 
-Please refer to Kinde’s [contributing guidelines](https://github.com/kinde-oss/.github/blob/489e2ca9c3307c2b2e098a885e22f2239116394a/CONTRIBUTING.md).
+[View all Kinde SDKs](https://docs.kinde.com/developer-tools/about/our-sdks/)
+
+## For Existing Users
+
+If you're currently using this SDK in production:
+
+- The SDK will continue to function as-is, but we recommend migrating to direct API integration
+- Test thoroughly in a development environment before switching in production
+
+## Need Help Migrating?
+
+- **Join our community:** [Kinde Slack Community](https://kinde.com/community/)
+- **General Kinde support:** [support@kinde.com](mailto:support@kinde.com)
+- **Documentation:** [docs.kinde.com](https://docs.kinde.com/)
+
+---
+
+We appreciate everyone who used and contributed to this SDK. Thank you for being part of the Kinde community.
+
+**— The Kinde Team**
 
 ## License
 
-By contributing to Kinde, you agree that your contributions will be licensed under its MIT License.
+MIT License. See [LICENSE](LICENSE) for details.
